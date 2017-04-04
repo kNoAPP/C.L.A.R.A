@@ -38,6 +38,7 @@ public class MySQL {
 			Clara.getPlugin().getLogger().info("Connected to Database: " + database);
 		} catch (ClassNotFoundException | SQLException e) {
 			Clara.getPlugin().getLogger().info("Connection Failed.");
+			connection = null;
 			return false;
 		}
 		
@@ -76,206 +77,238 @@ public class MySQL {
 	}
 	
 	public static synchronized int getInt(String table, String outputType, String inputType, String input) {
-		int a = 0;
-		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
-			ResultSet rs = ps.executeQuery();
-			if(rs.next()) {
-				a = rs.getInt(outputType);
+		if(connection != null) {
+			int a = 0;
+			try {
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+				ResultSet rs = ps.executeQuery();
+				if(rs.next()) {
+					a = rs.getInt(outputType);
+				}
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
 			}
-			ps.close();
-		} catch(Exception e) {
-			e.printStackTrace();
+			return a;
 		}
-		return a;
+		return 0;
 	}
 	
 	public static synchronized int getInt(String table, String outputType, String inputType, int input) {
-		int a = 0;
-		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
-			ResultSet rs = ps.executeQuery();
-			if(rs.next()) {
-				a = rs.getInt(outputType);
+		if(connection != null) {
+			int a = 0;
+			try {
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+				ResultSet rs = ps.executeQuery();
+				if(rs.next()) {
+					a = rs.getInt(outputType);
+				}
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
 			}
-			ps.close();
-		} catch(Exception e) {
-			e.printStackTrace();
+			return a;
 		}
-		return a;
+		return 0;
 	}
 	
 	public static synchronized String getString(String table, String outputType, String inputType, String input) {
-		String a = null;
-		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
-			ResultSet rs = ps.executeQuery();
-			if(rs.next()) {
-				a = rs.getString(outputType);
+		if(connection != null) {
+			String a = null;
+			try {
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+				ResultSet rs = ps.executeQuery();
+				if(rs.next()) {
+					a = rs.getString(outputType);
+				}
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
 			}
-			ps.close();
-		} catch(Exception e) {
-			e.printStackTrace();
+			return a;
 		}
-		return a;
+		return null;
 	}
 	
 	public static synchronized String getString(String table, String outputType, String inputType, int input) {
-		String a = null;
-		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
-			ResultSet rs = ps.executeQuery();
-			if(rs.next()) {
-				a = rs.getString(outputType);
+		if(connection != null) {
+			String a = null;
+			try {
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+				ResultSet rs = ps.executeQuery();
+				if(rs.next()) {
+					a = rs.getString(outputType);
+				}
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
 			}
-			ps.close();
-		} catch(Exception e) {
-			e.printStackTrace();
+			return a;
 		}
-		return a;
+		return null;
 	}
 	
 	public static synchronized void update(String table, String updateType, String update, String inputType, String input) {
-		new BukkitRunnable() {
-    		public void run() {
-    			try {
-    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
-    				ps.executeUpdate();
-    				ps.close();
-    			} catch(Exception e) {
-    				e.printStackTrace();
-    			}
-    		}
-		}.runTaskAsynchronously(Clara.getPlugin());
+		if(connection != null) {
+			new BukkitRunnable() {
+	    		public void run() {
+	    			try {
+	    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+	    				ps.executeUpdate();
+	    				ps.close();
+	    			} catch(Exception e) {
+	    				e.printStackTrace();
+	    			}
+	    		}
+			}.runTaskAsynchronously(Clara.getPlugin());
+		}
 	}
 	
 	public static synchronized void update(String table, String updateType, String update, String inputType, int input) {
-		new BukkitRunnable() {
-			public void run() {
-    			try {
-    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
-    				ps.executeUpdate();
-    				ps.close();
-    			} catch(Exception e) {
-    				e.printStackTrace();
-    			}
-    		}
-		}.runTaskAsynchronously(Clara.getPlugin());
+		if(connection != null) {
+			new BukkitRunnable() {
+				public void run() {
+	    			try {
+	    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+	    				ps.executeUpdate();
+	    				ps.close();
+	    			} catch(Exception e) {
+	    				e.printStackTrace();
+	    			}
+	    		}
+			}.runTaskAsynchronously(Clara.getPlugin());
+		}
 	}
 	
 	public static synchronized void update(String table, String updateType, int update, String inputType, String input) {
-		new BukkitRunnable() {
-			public void run() {
-    			try {
-    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
-    				ps.executeUpdate();
-    				ps.close();
-    			} catch(Exception e) {
-    				e.printStackTrace();
-    			}
-    		}
-		}.runTaskAsynchronously(Clara.getPlugin());
+		if(connection != null) {
+			new BukkitRunnable() {
+				public void run() {
+	    			try {
+	    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+	    				ps.executeUpdate();
+	    				ps.close();
+	    			} catch(Exception e) {
+	    				e.printStackTrace();
+	    			}
+	    		}
+			}.runTaskAsynchronously(Clara.getPlugin());
+		}
 	}
 	
 	public static synchronized void update(String table, String updateType, double update, String inputType, String input) {
-		new BukkitRunnable() {
-			public void run() {
-    			try {
-    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
-    				ps.executeUpdate();
-    				ps.close();
-    			} catch(Exception e) {
-    				e.printStackTrace();
-    			}
-    		}
-		}.runTaskAsynchronously(Clara.getPlugin());
+		if(connection != null) {
+			new BukkitRunnable() {
+				public void run() {
+	    			try {
+	    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+	    				ps.executeUpdate();
+	    				ps.close();
+	    			} catch(Exception e) {
+	    				e.printStackTrace();
+	    			}
+	    		}
+			}.runTaskAsynchronously(Clara.getPlugin());
+		}
 	}
 	
 	public static synchronized void update(String table, String updateType, int update, String inputType, int input) {
-		new BukkitRunnable() {
-			public void run() {
-    			try {
-    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
-    				ps.executeUpdate();
-    				ps.close();
-    			} catch(Exception e) {
-    				e.printStackTrace();
-    			}
-    		}
-		}.runTaskAsynchronously(Clara.getPlugin());
+		if(connection != null) {
+			new BukkitRunnable() {
+				public void run() {
+	    			try {
+	    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+	    				ps.executeUpdate();
+	    				ps.close();
+	    			} catch(Exception e) {
+	    				e.printStackTrace();
+	    			}
+	    		}
+			}.runTaskAsynchronously(Clara.getPlugin());
+		}
 	}
 	
 	public static synchronized void delete(String table, String inputType, String input) {
-		new BukkitRunnable() {
-			public void run() {
-				try {
-					PreparedStatement ps = connection.prepareStatement("DELETE FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
-					ps.execute();
-					ps.close();
-				} catch(Exception e) {
-					e.printStackTrace();
+		if(connection != null) {
+			new BukkitRunnable() {
+				public void run() {
+					try {
+						PreparedStatement ps = connection.prepareStatement("DELETE FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+						ps.execute();
+						ps.close();
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		}.runTaskAsynchronously(Clara.getPlugin());
+			}.runTaskAsynchronously(Clara.getPlugin());
+		}
 	}
 	
 	public static synchronized void delete(String table, String inputType, int input) {
-		new BukkitRunnable() {
-			public void run() {
-				try {
-					PreparedStatement ps = connection.prepareStatement("DELETE FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
-					ps.execute();
-					ps.close();
-				} catch(Exception e) {
-					e.printStackTrace();
+		if(connection != null) {
+			new BukkitRunnable() {
+				public void run() {
+					try {
+						PreparedStatement ps = connection.prepareStatement("DELETE FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+						ps.execute();
+						ps.close();
+					} catch(Exception e) {
+						e.printStackTrace();
+					}
 				}
-			}
-		}.runTaskAsynchronously(Clara.getPlugin());
+			}.runTaskAsynchronously(Clara.getPlugin());
+		}
 	}
 	
 	public static synchronized ArrayList<String> getStringList(String table, String outputType) {
-		ArrayList<String> o = new ArrayList<String>();
-		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + "FROM `" + table + "`");
-			ResultSet rs = ps.executeQuery();
-			
-			while(rs.next()) {
-				o.add(rs.getString(outputType));
+		if(connection != null) {
+			ArrayList<String> o = new ArrayList<String>();
+			try {
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + "FROM `" + table + "`");
+				ResultSet rs = ps.executeQuery();
+				
+				while(rs.next()) {
+					o.add(rs.getString(outputType));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			return o;
 		}
-		return o;
+		return null;
 	}
 	
 	public static synchronized ArrayList<Integer> getIntList(String table, String outputType) {
-		ArrayList<Integer> o = new ArrayList<Integer>();
-		try {
-			PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + "FROM `" + table + "`");
-			ResultSet rs = ps.executeQuery();
-			
-			while(rs.next()) {
-				o.add(rs.getInt(outputType));
+		if(connection != null) {
+			ArrayList<Integer> o = new ArrayList<Integer>();
+			try {
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + "FROM `" + table + "`");
+				ResultSet rs = ps.executeQuery();
+				
+				while(rs.next()) {
+					o.add(rs.getInt(outputType));
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
 			}
-		} catch (Exception e) {
-			e.printStackTrace();
+			return o;
 		}
-		return o;
+		return null;
 	}
 	
-    @SuppressWarnings("deprecation")
-	public static synchronized void loadPlayer(String s) {
-    	OfflinePlayer p = Bukkit.getOfflinePlayer(s);
-    	for(Table t : Table.values()) {
-    		if(t.getType() == Table.TYPE_PLAYER) {
-    			if(getString(t.getName(), "UUID", "UUID", p.getUniqueId().toString()) == null) {
-    				t.addPlayer(s);
-    			} else {
-    				if(!getString(t.getName(), "name", "UUID", p.getUniqueId().toString()).equals(p.getName())) {
-    					update(t.getName(), "name", p.getName(), "UUID", p.getUniqueId().toString());
-    				}
-    			}
-    		}
-    	}
-    }
+	 @SuppressWarnings("deprecation")
+		public static synchronized void loadPlayer(String s) {
+	    	OfflinePlayer p = Bukkit.getOfflinePlayer(s);
+	    	for(Table t : Table.values()) {
+	    		if(t.getType() == Table.TYPE_PLAYER) {
+	    			if(getString(t.getName(), "UUID", "UUID", p.getUniqueId().toString()) == null) {
+	    				t.addPlayer(s);
+	    			} else {
+	    				if(!getString(t.getName(), "name", "UUID", p.getUniqueId().toString()).equals(p.getName())) {
+	    					update(t.getName(), "name", p.getName(), "UUID", p.getUniqueId().toString());
+	    				}
+	    			}
+	    		}
+	    	}
+	    }
 }
