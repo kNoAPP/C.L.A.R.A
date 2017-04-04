@@ -38,7 +38,6 @@ public class MySQL {
 			Clara.getPlugin().getLogger().info("Connected to Database: " + database);
 		} catch (ClassNotFoundException | SQLException e) {
 			Clara.getPlugin().getLogger().info("Connection Failed.");
-			e.printStackTrace();
 			return false;
 		}
 		

@@ -1,10 +1,8 @@
 package com.kNoAPP.Clara.data;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
-import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 
@@ -31,9 +29,9 @@ public enum Data {
 	
 	public void setFile(String path) {
 		if(path == "") {
-			this.file = new File(Clara.getPlugin().getDataFolder(), this.getFileName());
+			file = new File(Clara.getPlugin().getDataFolder(), getFileName());
 		} else {
-			this.file = new File(path, this.getFileName());
+			file = new File(path, getFileName());
 		}
 	}
 	
@@ -47,9 +45,17 @@ public enum Data {
 	
 	public void logDataFile() {
 		try {
-			this.fc.save(this.getFile());
+			fc.save(getFile());
 		} catch (IOException e) {
 			e.printStackTrace();
+		}
+	}
+	
+	public void loadDataFile() {
+		try {
+			fc.load(getFile());
+		} catch (Exception e) {
+			 e.printStackTrace();
 		}
 	}
 	
@@ -58,14 +64,15 @@ public enum Data {
 	}
 	
 	public String getPath() {
-		return this.getFile().getAbsolutePath();
+		return getFile().getAbsolutePath();
 	}
 	
 	public void createDataFile() {
-		if(!this.getFile().exists()) {
-			Clara.getPlugin().getLogger().info(this.getFileName() + " not found. Creating...");
+		if(!getFile().exists()) {
+			Clara.getPlugin().getLogger().info(getFileName() + " not found. Creating...");
 			try {
-				this.getFile().createNewFile();
+				getFile().mkdirs();
+				getFile().createNewFile();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -84,18 +91,10 @@ public enum Data {
 				fc.set("MySQL.password", "psswd");
 				fc.set("Bungee.path", "/example/path/");
 			}
-			this.saveDataFile(fc);
-			this.logDataFile();
+			saveDataFile(fc);
+			logDataFile();
         }
-	
-		try {
-			this.fc.load(this.getFile());
-		} catch (FileNotFoundException e) {
-			 e.printStackTrace();
-	    } catch (IOException e) {
-	         e.printStackTrace();
-	    } catch (InvalidConfigurationException e) {
-	    	 e.printStackTrace();
-	    }
+		
+		loadDataFile();
 	}
 }

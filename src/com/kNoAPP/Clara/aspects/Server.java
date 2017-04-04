@@ -105,8 +105,8 @@ public class Server {
 				}
 			}
 		} else {
-			Clara.getPlugin().getLogger().info("Bungee config.yml path incorrect; fix and try again!");
-			Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
+			//Clara.getPlugin().getLogger().info("Bungee config.yml path incorrect; fix and try again!");
+			//Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
 		}
 	}
 	

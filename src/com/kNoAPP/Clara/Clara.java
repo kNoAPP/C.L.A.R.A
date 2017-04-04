@@ -44,7 +44,7 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	private void register() {
 		if(!MySQL.loadConnection()) {
 			getPlugin().getLogger().info("Please fix your database main.yml and try again!");
-			this.getPluginLoader().disablePlugin(this);
+			//this.getPluginLoader().disablePlugin(this);
 		}
 		
 		this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
@@ -93,6 +93,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	}
 	
 	public static Plugin getPlugin() {
-		return Bukkit.getPluginManager().getPlugin("Clara");
+		return Bukkit.getPluginManager().getPlugin("CLARA");
 	}
 }
