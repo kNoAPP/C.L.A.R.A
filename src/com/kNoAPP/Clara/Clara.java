@@ -8,6 +8,7 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import com.kNoAPP.Clara.aspects.Server;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
+import com.kNoAPP.Clara.commands.Info;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.data.MySQL;
 
@@ -48,6 +49,8 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		
 		this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 		this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
+		
+		this.getCommand("clara").setExecutor(new Info());
 	}
 	
 	private void finalLoadSteps() {
