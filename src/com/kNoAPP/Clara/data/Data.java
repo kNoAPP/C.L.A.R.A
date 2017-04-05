@@ -71,11 +71,9 @@ public enum Data {
 		if(!getFile().exists()) {
 			Clara.getPlugin().getLogger().info(getFileName() + " not found. Creating...");
 			try {
-				getFile().mkdirs();
 				getFile().createNewFile();
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			} catch (Exception e) {}
+			
 			FileConfiguration fc = this.fc;
 			if(this == CONFIG) {
 				fc.set("Version", "1.0.0");

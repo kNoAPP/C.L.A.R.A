@@ -15,6 +15,8 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.Clara;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class MySQL {
 
 	public static Connection connection;
@@ -35,9 +37,10 @@ public class MySQL {
 		
 		try {
 			openConnection();
-			Clara.getPlugin().getLogger().info("Connected to Database: " + database);
+			Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Connected to Database: " + database);
 		} catch (ClassNotFoundException | SQLException e) {
-			Clara.getPlugin().getLogger().info("Connection Failed.");
+			e.printStackTrace();
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Connection failed.");
 			connection = null;
 			return false;
 		}

@@ -15,6 +15,8 @@ import com.kNoAPP.Clara.data.MySQL;
 import com.kNoAPP.Clara.data.Table;
 import com.kNoAPP.Clara.utils.Tools;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class Server {
 
 	public static List<Server> servers = new ArrayList<Server>();
@@ -105,8 +107,8 @@ public class Server {
 				}
 			}
 		} else {
-			//Clara.getPlugin().getLogger().info("Bungee config.yml path incorrect; fix and try again!");
-			//Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Bungee config.yml path incorrect; fix and try again!");
+			Clara.failed = true;
 		}
 	}
 	

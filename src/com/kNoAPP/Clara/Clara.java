@@ -8,22 +8,30 @@ import org.bukkit.plugin.messaging.PluginMessageListener;
 
 import com.kNoAPP.Clara.aspects.Server;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
+import com.kNoAPP.Clara.commands.ImportExport;
 import com.kNoAPP.Clara.commands.Info;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.data.MySQL;
 
+import net.md_5.bungee.api.ChatColor;
+
 public class Clara extends JavaPlugin implements PluginMessageListener {
 
+	public static boolean failed = false;
 	
 	@Override
 	public void onEnable() {
 		long tStart = System.currentTimeMillis();
-		register();
 		importData();
+		register();
 		importAspects();
 		finalLoadSteps();
 		long tEnd = System.currentTimeMillis();
 		getPlugin().getLogger().info("Successfully Enabled! (" + (tEnd - tStart) + " ms)");
+		
+		if(failed) {
+			getPlugin().getPluginLoader().disablePlugin(this);
+		}
 	}
 	
 	@Override
@@ -43,20 +51,29 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	
 	private void register() {
 		if(!MySQL.loadConnection()) {
-			getPlugin().getLogger().info("Please fix your database main.yml and try again!");
-			//this.getPluginLoader().disablePlugin(this);
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] Please fix your database settings and try again!");
+			failed = true;
 		}
 		
 		this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 		this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
 		
 		this.getCommand("clara").setExecutor(new Info());
+		
+		this.getCommand("import").setExecutor(new ImportExport());
+		this.getCommand("export").setExecutor(new ImportExport());
 	}
 	
 	private void finalLoadSteps() {
 		Server.importServers();
-		Server.getThisServer().logToDB();
-		Server.checkSetup();
+		if(Server.getThisServer() == null && !failed) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] This server isn't in your Bungee Configuration!");
+			failed = true;
+		}
+		if(!failed) {
+			Server.getThisServer().logToDB();
+			Server.checkSetup();
+		}
 	}
 	
 	private void finalUnloadSteps() {
