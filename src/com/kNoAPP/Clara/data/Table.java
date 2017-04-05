@@ -7,7 +7,7 @@ import com.kNoAPP.Clara.Clara;
 public enum Table {
 	
 	//SABOTAGE("Sabotage", 0, "CREATE TABLE IF NOT EXISTS Sabotage(UUID varchar(36), name varchar(16), karma int, passes int, life_karma int, correct_kills int, deaths int, karma_spent int, games_played int, kdratio decimal(3,3))");
-	SERVER("Clara", 1, "CREATE TABLE IF NOT EXISTS Server(name varchar(16), port int, online int)");
+	SERVER("Server", 1, "CREATE TABLE IF NOT EXISTS Server(name varchar(16), port int, online int)");
 	
 	public static final int TYPE_PLAYER = 0;
 	public static final int TYPE_OBJECT = 1;

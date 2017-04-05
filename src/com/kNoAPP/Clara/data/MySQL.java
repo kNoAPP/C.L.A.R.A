@@ -231,6 +231,66 @@ public class MySQL {
 		}
 	}
 	
+	public static synchronized void specialUpdate(String table, String updateType, String update, String inputType, String input) {
+		if(connection != null) {
+    			try {
+    				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+    				ps.executeUpdate();
+    				ps.close();
+    			} catch(Exception e) {
+    				e.printStackTrace();
+    			}
+		}
+	}
+	
+	public static synchronized void specialUpdate(String table, String updateType, String update, String inputType, int input) {
+		if(connection != null) {
+			try {
+				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+				ps.executeUpdate();
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static synchronized void specialUpdate(String table, String updateType, int update, String inputType, String input) {
+		if(connection != null) {
+			try {
+				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+				ps.executeUpdate();
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static synchronized void specialUpdate(String table, String updateType, double update, String inputType, String input) {
+		if(connection != null) {
+			try {
+				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+				ps.executeUpdate();
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static synchronized void specialUpdate(String table, String updateType, int update, String inputType, int input) {
+		if(connection != null) {
+			try {
+				PreparedStatement ps = connection.prepareStatement("UPDATE `" + table + "` SET " + updateType + "='" + update + "' WHERE " + inputType + "='" + input + "';");
+				ps.executeUpdate();
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static synchronized void delete(String table, String inputType, String input) {
 		if(connection != null) {
 			new BukkitRunnable() {
@@ -263,11 +323,35 @@ public class MySQL {
 		}
 	}
 	
+	public static synchronized void specialDelete(String table, String inputType, String input) {
+		if(connection != null) {
+			try {
+				PreparedStatement ps = connection.prepareStatement("DELETE FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+				ps.execute();
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static synchronized void specialDelete(String table, String inputType, int input) {
+		if(connection != null) {
+			try {
+				PreparedStatement ps = connection.prepareStatement("DELETE FROM `" + table + "` WHERE " + inputType + "='" + input + "';");
+				ps.execute();
+				ps.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	public static synchronized ArrayList<String> getStringList(String table, String outputType) {
 		if(connection != null) {
 			ArrayList<String> o = new ArrayList<String>();
 			try {
-				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + "FROM `" + table + "`");
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "`");
 				ResultSet rs = ps.executeQuery();
 				
 				while(rs.next()) {
@@ -285,7 +369,7 @@ public class MySQL {
 		if(connection != null) {
 			ArrayList<Integer> o = new ArrayList<Integer>();
 			try {
-				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + "FROM `" + table + "`");
+				PreparedStatement ps = connection.prepareStatement("SELECT " + outputType + " FROM `" + table + "`");
 				ResultSet rs = ps.executeQuery();
 				
 				while(rs.next()) {

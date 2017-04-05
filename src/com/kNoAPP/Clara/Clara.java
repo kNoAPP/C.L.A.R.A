@@ -73,11 +73,12 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		if(!failed) {
 			Server.getThisServer().logToDB();
 			Server.checkSetup();
+			Server.getThisServer().setOnline(true);
 		}
 	}
 	
 	private void finalUnloadSteps() {
-		
+		Server.getThisServer().setOnline(false, true);
 	}
 	
 	public static void importData() {

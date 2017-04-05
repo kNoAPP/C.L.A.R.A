@@ -45,6 +45,11 @@ public class Server {
 		MySQL.update(Table.SERVER.getName(), "online", Tools.convertInt(b), "name", name);
 	}
 	
+	public void setOnline(boolean b, boolean s) {
+		if(s) MySQL.specialUpdate(Table.SERVER.getName(), "online", Tools.convertInt(b), "name", name);
+		else MySQL.update(Table.SERVER.getName(), "online", Tools.convertInt(b), "name", name);
+	}
+	
 	public void logToDB() {
 		if(MySQL.getString(Table.SERVER.getName(), "name", "name", name) == null) {
 			//Add Server
@@ -52,7 +57,7 @@ public class Server {
 			new BukkitRunnable() {
 				public void run() {
 					try {
-						PreparedStatement ps = MySQL.getConnection().prepareStatement("INSERT INTO `" + Table.SERVER.getName() + "` values('" + s.getName() + "', '" + s.getPort() + "');");
+						PreparedStatement ps = MySQL.getConnection().prepareStatement("INSERT INTO `" + Table.SERVER.getName() + "` values('" + s.getName() + "', " + s.getPort() + ", 1);");
 						ps.execute();
 						ps.close();
 					} catch(Exception e) {
