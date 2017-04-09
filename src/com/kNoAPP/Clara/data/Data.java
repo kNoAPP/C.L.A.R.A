@@ -11,7 +11,8 @@ import com.kNoAPP.Clara.Clara;
 public enum Data {
 	
 	CONFIG(new File(Clara.getPlugin().getDataFolder(), "config.yml"), new YamlConfiguration(), "config.yml"),
-	MAIN(null, new YamlConfiguration(), "main.yml");
+	MAIN(null, new YamlConfiguration(), "main.yml"),
+	ENVIRONMENT(null, new YamlConfiguration(), "environment.yml");
 	
 	private File file;
 	private FileConfiguration fc;
@@ -88,6 +89,9 @@ public enum Data {
 				fc.set("MySQL.username", "root");
 				fc.set("MySQL.password", "psswd");
 				fc.set("Bungee.path", "/example/path/");
+			}
+			if(this == ENVIRONMENT) {
+				fc.set("Version", "1.0.0");
 			}
 			saveDataFile(fc);
 			logDataFile();

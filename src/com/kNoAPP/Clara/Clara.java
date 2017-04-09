@@ -6,10 +6,11 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Server;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.commands.ImportExport;
-import com.kNoAPP.Clara.commands.Info;
+import com.kNoAPP.Clara.commands.CmdManager;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.data.MySQL;
 
@@ -25,7 +26,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		importData();
 		register();
 		importAspects();
-		finalLoadSteps();
 		long tEnd = System.currentTimeMillis();
 		getPlugin().getLogger().info("Successfully Enabled! (" + (tEnd - tStart) + " ms)");
 		
@@ -39,7 +39,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		long tStart = System.currentTimeMillis();
 		exportAspects();
 		exportData();
-		finalUnloadSteps();
 		long tEnd = System.currentTimeMillis();
 		getPlugin().getLogger().info("Successfully Disabled! (" + (tEnd - tStart) + " ms)");
 	}
@@ -58,27 +57,10 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 		this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
 		
-		this.getCommand("clara").setExecutor(new Info());
+		this.getCommand("clara").setExecutor(new CmdManager());
 		
 		this.getCommand("import").setExecutor(new ImportExport());
 		this.getCommand("export").setExecutor(new ImportExport());
-	}
-	
-	private void finalLoadSteps() {
-		Server.importServers();
-		if(Server.getThisServer() == null && !failed) {
-			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] This server isn't in your Bungee Configuration!");
-			failed = true;
-		}
-		if(!failed) {
-			Server.getThisServer().logToDB();
-			Server.checkSetup();
-			Server.getThisServer().setOnline(true);
-		}
-	}
-	
-	private void finalUnloadSteps() {
-		Server.getThisServer().setOnline(false, true);
 	}
 	
 	public static void importData() {
@@ -104,10 +86,26 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	
 	public static void importAspects() {
 		getPlugin().getLogger().info("Importing Aspects...");
+		
+		Server.importServers();
+		if(Server.getThisServer() == null && !failed) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] This server isn't in your Bungee Configuration!");
+			failed = true;
+		}
+		if(!failed) {
+			Server.getThisServer().logToDB();
+			Server.checkSetup();
+			Server.getThisServer().setOnline(true);
+			
+			Environment.importEnvironments();
+		}
 	}
 	
 	public static void exportAspects() {
 		getPlugin().getLogger().info("Exporting Aspects...");
+		
+		Server.getThisServer().setOnline(false, true);
+		Environment.exportEnvironments();
 	}
 	
 	public static Plugin getPlugin() {

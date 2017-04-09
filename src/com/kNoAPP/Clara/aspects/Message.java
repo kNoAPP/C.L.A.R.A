@@ -7,7 +7,9 @@ public enum Message {
 	MISSING(ChatColor.GOLD + "Permission> "),
 	ARGS(ChatColor.GOLD + "Missing Args> "),
 	USAGE(ChatColor.GOLD + "Usage> "),
-	INFO(ChatColor.GOLD + "Info> ");
+	INFO(ChatColor.GOLD + "Info> "),
+	
+	HELP("  ");
 	
 	private String prefix;
 	
@@ -23,7 +25,7 @@ public enum Message {
 		if(this == MISSING) {
 			return prefix + ChatColor.GRAY + "You are missing Node [" + ChatColor.DARK_AQUA + s + ChatColor.GRAY + "]!";
 		}
-		if(this == ARGS || this == USAGE || this == INFO) {
+		if(this == ARGS || this == USAGE || this == INFO || this == HELP) {
 			return prefix + ChatColor.GRAY + s;
 		}
 		return null;
