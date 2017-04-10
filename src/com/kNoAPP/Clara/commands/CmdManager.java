@@ -5,6 +5,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Message;
 
 public class CmdManager implements CommandExecutor {
@@ -21,6 +22,7 @@ public class CmdManager implements CommandExecutor {
 				if(args.length == 1) {
 					if(args[0].equalsIgnoreCase("guitool")) {
 						if(p.hasPermission("clara.guitool")) {
+							Environment.openInventory(p);
 							return true;
 						} else {
 							p.sendMessage(Message.MISSING.getMessage("clara.guitool"));
