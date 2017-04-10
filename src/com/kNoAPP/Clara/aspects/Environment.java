@@ -86,7 +86,7 @@ public class Environment {
 	
 	public static void importEnvironments() {
 		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
-		if(fc.getConfigurationSection("Environment").getKeys(false) != null) { //New plugins will trigger this check.
+		if(fc.getConfigurationSection("Environment") != null) { //New plugins will trigger this check.
 			for(String name : fc.getConfigurationSection("Environment").getKeys(false)) {
 				int id = fc.getInt("Environment." + name + ".id");
 				Material icon = Material.getMaterial(fc.getString("Environment." + name + ".icon"));

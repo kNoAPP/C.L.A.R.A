@@ -87,6 +87,7 @@ public enum SpecialItem {
 				im.addItemFlags(iF);
 			}
 		}
+		is.setItemMeta(im);
 		return is;
 	}
 }
