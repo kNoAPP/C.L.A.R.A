@@ -1,11 +1,13 @@
 package com.kNoAPP.Clara;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import com.kNoAPP.Clara.aspects.Actions;
 import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Server;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
@@ -13,8 +15,6 @@ import com.kNoAPP.Clara.commands.ImportExport;
 import com.kNoAPP.Clara.commands.CmdManager;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.data.MySQL;
-
-import net.md_5.bungee.api.ChatColor;
 
 public class Clara extends JavaPlugin implements PluginMessageListener {
 
@@ -56,6 +56,8 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		
 		this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 		this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
+		
+		this.getServer().getPluginManager().registerEvents(new Actions(), this);
 		
 		this.getCommand("clara").setExecutor(new CmdManager());
 		

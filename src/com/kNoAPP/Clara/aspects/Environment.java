@@ -84,6 +84,15 @@ public class Environment {
 		
 	}
 	
+	public Inventory getSubInventory() {
+		
+	}
+	
+	public void openSubInventory(Player p) {
+		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.openInventory(getSubInventory());
+	}
+	
 	public static void importEnvironments() {
 		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 		if(fc.getConfigurationSection("Environment") != null) { //New plugins will trigger this check.
@@ -126,7 +135,7 @@ public class Environment {
 		return getEnvironment(Data.ENVIRONMENT.getFileConfig().getInt("Active"));
 	}
 	
-	public static Inventory getInventory() {
+	public static Inventory getMainInventory() {
 		Inventory inv = Bukkit.createInventory(null, 54, "Clara Setups");
 		inv.setItem(4, SpecialItem.CLARA_SETUPS.getItem());
 		
@@ -146,8 +155,8 @@ public class Environment {
 		return inv;
 	}
 	
-	public static void openInventory(Player p) {
+	public static void openMainInventory(Player p) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-		p.openInventory(getInventory());
+		p.openInventory(getMainInventory());
 	}
 }
