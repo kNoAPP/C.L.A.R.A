@@ -15,7 +15,14 @@ public enum SpecialItem {
 	CLARA_SETUPS(ChatColor.DARK_GREEN + "Clara Setups", 1, (byte)0, Material.FEATHER, 
 			new String[]{ChatColor.GRAY + "Manage your server setups here!"}, null, null),
 	NEW_SETUP(ChatColor.GREEN + "New Setup", 1, (byte)5, Material.STAINED_GLASS_PANE,
-			new String[]{ChatColor.GRAY + "Create a new setup..."}, null, null);
+			new String[]{ChatColor.GRAY + "Create a new setup..."}, null, null),
+	
+	CHANGE_NAME(ChatColor.DARK_PURPLE + "Change Name", 1, (byte)0, Material.BOOK_AND_QUILL,
+			new String[]{ChatColor.GRAY + "Change this environment's name!"}, null, null),
+	START_SERVER(ChatColor.GREEN + "Start Server", 1, (byte)0, Material.EMERALD_BLOCK,
+			new String[]{ChatColor.GRAY + "Start this server setup"}, null, null),
+	STOP_SERVER(ChatColor.RED + "Stop Server", 1, (byte)0, Material.REDSTONE_BLOCK,
+			new String[]{ChatColor.GRAY + "Stop this server setup"}, null, null);
 	
 	private String name;
 	private int count;

@@ -85,7 +85,12 @@ public class Environment {
 	}
 	
 	public Inventory getSubInventory() {
-		
+		Inventory inv = Bukkit.createInventory(null, 54, name);
+		inv.setItem(4, getItem());
+		inv.setItem(22, SpecialItem.CHANGE_NAME.getItem());
+		inv.setItem(19, SpecialItem.START_SERVER.getItem());
+		inv.setItem(37, SpecialItem.STOP_SERVER.getItem());
+		return inv;
 	}
 	
 	public void openSubInventory(Player p) {

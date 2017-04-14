@@ -66,6 +66,12 @@ public class MySQL {
 		
 		Class.forName("com.mysql.jdbc.Driver");
 		connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?autoReconnect=true", username, password);
+	
+		new BukkitRunnable() {
+			public void run() {
+				MySQL.getString(Table.SERVER.getName(), "name", "name", "kpalv");
+			}
+		}.runTaskTimer(Clara.getPlugin(), 6000L, 6000L);
 	}
 	
 	public static void createTables() {
