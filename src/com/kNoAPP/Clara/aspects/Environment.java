@@ -1,8 +1,11 @@
 package com.kNoAPP.Clara.aspects;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -15,7 +18,9 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.kNoAPP.Clara.Clara;
 import com.kNoAPP.Clara.data.Data;
+import com.kNoAPP.Clara.utils.Tools;
 
 public class Environment {
 
@@ -25,16 +30,22 @@ public class Environment {
 	private int id;
 	private Material icon;
 	
+	private List<String> pluginNames;
+	
 	public Environment(String name, int id) {
 		this.name = name;
 		this.id = id;
 		icon = Material.PAPER;
+		
+		pluginNames = new ArrayList<String>();
 	}
 	
 	public Environment(String name, int id, Material icon) {
 		this.name = name;
 		this.id = id;
 		this.icon = icon;
+		
+		pluginNames = new ArrayList<String>();
 	}
 	
 	public String getName() {
@@ -47,6 +58,48 @@ public class Environment {
 	
 	public Material getIcon() {
 		return icon;
+	}
+	
+	public List<String> getPluginNames() {
+		return pluginNames;
+	}
+	
+	public boolean isMissingPlugins(boolean local) {
+		return Tools.convertBoolean(getMissingPlugins(local).size());
+	}
+	
+	public List<String> getMissingPlugins(boolean local) {
+		List<String> pluginFiles = new ArrayList<String>();
+		File source;
+		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
+		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		File[] targets = source.listFiles();
+		
+		for(String s : pluginNames) {
+			boolean m = true;
+			for(File target : targets) {
+				if(target.getName().equals(s) && target.isFile()) m = false;
+			}
+			if(m) pluginFiles.add(s);
+		}
+		return pluginFiles;
+	}
+	
+	public List<File> getPlugins(boolean local) {
+		List<File> pluginFiles = new ArrayList<File>();
+		File source;
+		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
+		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		File[] targets = source.listFiles();
+		
+		for(String s : pluginNames) {
+			for(File target : targets) {
+				if(target.getName().equals(s) && target.isFile()) {
+					pluginFiles.add(target);
+				}
+			}
+		}
+		return pluginFiles;
 	}
 	
 	public ItemStack getItem() {
@@ -74,6 +127,18 @@ public class Environment {
 	}
 	
 	public void load() {
+		if(isMissingPlugins(false)) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] This setup is missing plugins!");
+			for(String s : getMissingPlugins(false)) {
+				Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] " + ChatColor.GOLD + s);
+			}
+		}
+		
+		File d = new File(Bukkit.getWorldContainer(), "plugins");
+		for(File f : getPlugins(false)) {
+			try {FileUtils.copyFileToDirectory(f, d);} 
+			catch (IOException ex) {ex.printStackTrace();}
+		}
 		
 		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 		fc.set("Active", getID());
@@ -81,7 +146,11 @@ public class Environment {
 	}
 	
 	public void unload() {
+		for(File f : getPlugins(true)) {
+			f.delete();
+		}
 		
+		Bukkit.reload(); //Try this
 	}
 	
 	public Inventory getSubInventory() {
@@ -104,7 +173,7 @@ public class Environment {
 			for(String name : fc.getConfigurationSection("Environment").getKeys(false)) {
 				int id = fc.getInt("Environment." + name + ".id");
 				Material icon = Material.getMaterial(fc.getString("Environment." + name + ".icon"));
-				environments.add(new Environment(name, id, icon));
+				new Environment(name, id, icon).add();
 			}
 		}
 	}

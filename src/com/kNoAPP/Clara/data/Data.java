@@ -92,6 +92,7 @@ public enum Data {
 			}
 			if(this == ENVIRONMENT) {
 				fc.set("Version", "1.0.0");
+				fc.set("Database", "/example/path/");
 			}
 			saveDataFile(fc);
 			logDataFile();

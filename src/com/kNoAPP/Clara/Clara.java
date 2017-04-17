@@ -1,5 +1,7 @@
 package com.kNoAPP.Clara;
 
+import java.io.File;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -94,12 +96,20 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] This server isn't in your Bungee Configuration!");
 			failed = true;
 		}
+		
+		File db = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		if(!db.exists() || !db.isDirectory()) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] Could not load environment database!");
+			failed = true;
+		}
+		
 		if(!failed) {
 			Server.getThisServer().logToDB();
 			Server.checkSetup();
 			Server.getThisServer().setOnline(true);
 			
 			Environment.importEnvironments();
+			Environment.getThisEnvironment().load();
 		}
 	}
 	
