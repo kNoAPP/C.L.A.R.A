@@ -127,6 +127,7 @@ public class Environment {
 	}
 	
 	public void load() {
+		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Loading Environment [" + getName() + "]");
 		if(isMissingPlugins(false)) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] This setup is missing plugins!");
 			for(String s : getMissingPlugins(false)) {
@@ -146,6 +147,7 @@ public class Environment {
 	}
 	
 	public void unload() {
+		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Unloading Environment [" + getName() + "]");
 		for(File f : getPlugins(true)) {
 			f.delete();
 		}
