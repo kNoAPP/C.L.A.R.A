@@ -109,11 +109,14 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			Server.getThisServer().setOnline(true);
 			
 			Environment.importEnvironments();
+			
+			/*
 			if(Environment.getThisEnvironment() != null) {
 				Environment.getThisEnvironment().load();
 			} else {
 				Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + getPlugin().getName() + "] Could not find environment to load!");
 			}
+			*/
 		}
 	}
 	

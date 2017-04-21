@@ -48,6 +48,14 @@ public class Environment {
 		pluginNames = new ArrayList<String>();
 	}
 	
+	public Environment(String name, int id, Material icon, List<String> pluginNames) {
+		this.name = name;
+		this.id = id;
+		this.icon = icon;
+		
+		this.pluginNames = pluginNames;
+	}
+	
 	public String getName() {
 		return name;
 	}
@@ -62,6 +70,14 @@ public class Environment {
 	
 	public List<String> getPluginNames() {
 		return pluginNames;
+	}
+	
+	public void addPlugin(File f) { //Could be String
+		pluginNames.add(f.getName());
+	}
+	
+	public void removePlugin(File f) { //Could be String
+		pluginNames.remove(f.getName());
 	}
 	
 	public boolean isMissingPlugins(boolean local) {
@@ -82,9 +98,14 @@ public class Environment {
 			}
 			if(m) pluginFiles.add(s);
 		}
+		
 		return pluginFiles;
 	}
 	
+	/**
+	 * Gets plugins involved with the current Environment only
+	 * @param local plugin(t) or database folder(f)
+	 */
 	public List<File> getPlugins(boolean local) {
 		List<File> pluginFiles = new ArrayList<File>();
 		File source;
@@ -92,11 +113,9 @@ public class Environment {
 		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
 		File[] targets = source.listFiles();
 		
-		for(String s : pluginNames) {
-			for(File target : targets) {
-				if(target.getName().equals(s) && target.isFile()) {
-					pluginFiles.add(target);
-				}
+		for(File target : targets) {
+			if(pluginNames.contains(target.getName()) && target.isFile()) {
+				pluginFiles.add(target);
 			}
 		}
 		return pluginFiles;
@@ -144,12 +163,16 @@ public class Environment {
 		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 		fc.set("Active", getID());
 		Data.ENVIRONMENT.saveDataFile(fc);
+		
+		Bukkit.reload(); //Try this
 	}
 	
 	public void unload() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Unloading Environment [" + getName() + "]");
 		for(File f : getPlugins(true)) {
-			f.delete();
+			Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + f.getName());
+			try{f.delete();}
+			catch(Exception ex) {ex.printStackTrace();}
 		}
 		
 		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
@@ -161,6 +184,7 @@ public class Environment {
 	
 	public Inventory getSubInventory() {
 		Inventory inv = Bukkit.createInventory(null, 54, name);
+		inv.setItem(0, SpecialItem.BACK.getItem());
 		inv.setItem(4, getItem());
 		inv.setItem(25, SpecialItem.MANAGE_PLUGINS.getItem());
 		if(getThisEnvironment() == null) inv.setItem(19, SpecialItem.START_SERVER.getItem());
@@ -175,6 +199,42 @@ public class Environment {
 	public void openSubInventory(Player p) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 		p.openInventory(getSubInventory());
+	}
+	
+	public Inventory getMPInventory() {
+		Inventory inv = Bukkit.createInventory(null, 54, name + " - Plugins");
+		int a = 0;
+		for(File f : getAllFiles(false)) {
+			if(f.isFile() && a < 45) {
+				inv.setItem(a, getMPItem(f));
+				a++;
+			}
+		}
+		
+		inv.setItem(49, SpecialItem.BACK.getItem());
+		return inv;
+	}
+	
+	public ItemStack getMPItem(File f) {
+		ItemStack is = new ItemStack(Material.PAPER, 1);
+		ItemMeta im = is.getItemMeta();
+		
+		im.setDisplayName(ChatColor.YELLOW + f.getName());
+		List<String> lores = new ArrayList<String>();
+		if(pluginNames.contains(f.getName())) {
+			im.addEnchant(Enchantment.ARROW_INFINITE, 1, false);
+			im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+			lores.add(ChatColor.GREEN + "Selected!");
+		}
+		lores.add(ChatColor.GRAY + f.getParentFile().getPath());
+		im.setLore(lores);
+		is.setItemMeta(im);
+		return is;
+	}
+	
+	public void openMPInventory(Player p) {
+		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.openInventory(getMPInventory());
 	}
 	
 	public static Environment createBasicSetup() {
@@ -199,22 +259,36 @@ public class Environment {
 		return id;
 	}
 	
+	/**
+	 * Gets all files in the local or database folder
+	 * @param local plugin(t) or database folder(f)
+	 */
+	public static File[] getAllFiles(boolean local) {
+		File source;
+		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
+		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		return source.listFiles();
+	}
+	
 	public static void importEnvironments() {
 		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 		if(fc.getConfigurationSection("Environment") != null) { //New plugins will trigger this check.
 			for(String name : fc.getConfigurationSection("Environment").getKeys(false)) {
 				int id = fc.getInt("Environment." + name + ".id");
 				Material icon = Material.getMaterial(fc.getString("Environment." + name + ".icon"));
-				new Environment(name, id, icon).add();
+				List<String> pluginNames = fc.getStringList("Environment." + name + ".plugins");
+				new Environment(name, id, icon, pluginNames).add();
 			}
 		}
 	}
 	
 	public static void exportEnvironments() {
 		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+		fc.set("Environment", null);
 		for(Environment e : environments) {
 			fc.set("Environment." + e.getName() + ".id", e.getID());
 			fc.set("Environment." + e.getName() + ".icon", e.getIcon().toString());
+			fc.set("Environment." + e.getName() + ".plugins", e.getPluginNames());
 		}
 		Data.ENVIRONMENT.saveDataFile(fc);
 	}

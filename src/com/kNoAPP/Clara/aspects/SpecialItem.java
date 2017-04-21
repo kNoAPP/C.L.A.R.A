@@ -16,6 +16,8 @@ public enum SpecialItem {
 			new String[]{ChatColor.GRAY + "Manage your server setups here!"}, null, null),
 	NEW_SETUP(ChatColor.GREEN + "New Setup", 1, (byte)5, Material.STAINED_GLASS_PANE,
 			new String[]{ChatColor.GRAY + "Create a new setup..."}, null, null),
+	BACK(ChatColor.GOLD + "Back", 1, (byte)0, Material.ARROW,
+			new String[]{ChatColor.GRAY + "Go back to the previous menu"}, null, null),
 	
 	MANAGE_PLUGINS(ChatColor.GOLD + "Manage Plugins", 1, (byte)0, Material.ANVIL,
 			new String[]{ChatColor.GRAY + "Add/Remove plugins to this setup"}, null, null),

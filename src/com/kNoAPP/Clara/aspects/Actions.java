@@ -1,5 +1,7 @@
 package com.kNoAPP.Clara.aspects;
 
+import java.io.File;
+
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,11 +38,15 @@ public class Actions implements Listener {
 			for(Environment env : Environment.environments) {
 				if(inv.getName().equals(env.getSubInventory().getName())) {
 					e.setCancelled(true);
+					if(is.isSimilar(SpecialItem.BACK.getItem())) {
+						Environment.openMainInventory(p);
+						return;
+					}
 					if(is.isSimilar(SpecialItem.START_SERVER.getItem())) {
 						p.closeInventory();
-						env.load();
 						p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been initialized."));
 						p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+						env.load();
 						return;
 					}
 					if(is.isSimilar(SpecialItem.STOP_SERVER.getItem())) {
@@ -53,6 +59,7 @@ public class Actions implements Listener {
 						return;
 					}
 					if(is.isSimilar(SpecialItem.MANAGE_PLUGINS.getItem())) {
+						env.openMPInventory(p);
 						return;
 					}
 					if(is.isSimilar(SpecialItem.CHANGE_NAME.getItem())) {
@@ -62,16 +69,32 @@ public class Actions implements Listener {
 						return;
 					}
 					if(is.isSimilar(SpecialItem.DELETE_ENVIRONMENT.getItem())) {
-						p.closeInventory();
 						if(Environment.getThisEnvironment() != env) {
 							env.remove();
 							p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been removed."));
-							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 						} else {
 							p.sendMessage(Message.INFO.getMessage("Cannot remove an active Environment!"));
-							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 						}
+						Environment.openMainInventory(p);
 						return;
+					}
+					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+					return;
+				}
+				if(inv.getName().equals(env.getMPInventory().getName())) {
+					e.setCancelled(true);
+					if(is.isSimilar(SpecialItem.BACK.getItem())) {
+						env.openSubInventory(p);
+						return;
+					}
+					for(File f : Environment.getAllFiles(false)) {
+						if(is.isSimilar(env.getMPItem(f))) {
+							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+							if(env.getPluginNames().contains(f.getName())) env.removePlugin(f);
+							else env.addPlugin(f);
+							env.openMPInventory(p);
+							return;
+						}
 					}
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 					return;
