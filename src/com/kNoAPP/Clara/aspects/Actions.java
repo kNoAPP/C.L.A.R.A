@@ -25,12 +25,57 @@ public class Actions implements Listener {
 						return;
 					}
 				}
-				if(SpecialItem.NEW_SETUP.getItem().isSimilar(is)) {
-					p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+				if(is.isSimilar(SpecialItem.NEW_SETUP.getItem())) {
+					Environment.createBasicSetup().openSubInventory(p);
 					return;
 				}
 				p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 				return;
+			}
+			
+			for(Environment env : Environment.environments) {
+				if(inv.getName().equals(env.getSubInventory().getName())) {
+					e.setCancelled(true);
+					if(is.isSimilar(SpecialItem.START_SERVER.getItem())) {
+						p.closeInventory();
+						env.load();
+						p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been initialized."));
+						p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.STOP_SERVER.getItem())) {
+						p.closeInventory();
+						if(Environment.getThisEnvironment() != null) { //Not Needed. There just in case.
+							p.sendMessage(Message.INFO.getMessage("Environment " + Environment.getThisEnvironment().getName() + " is being deconstructed..."));
+							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+							Environment.getThisEnvironment().unload();
+						}
+						return;
+					}
+					if(is.isSimilar(SpecialItem.MANAGE_PLUGINS.getItem())) {
+						return;
+					}
+					if(is.isSimilar(SpecialItem.CHANGE_NAME.getItem())) {
+						return;
+					}
+					if(is.isSimilar(SpecialItem.CHANGE_ICON.getItem())) {
+						return;
+					}
+					if(is.isSimilar(SpecialItem.DELETE_ENVIRONMENT.getItem())) {
+						p.closeInventory();
+						if(Environment.getThisEnvironment() != env) {
+							env.remove();
+							p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been removed."));
+							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+						} else {
+							p.sendMessage(Message.INFO.getMessage("Cannot remove an active Environment!"));
+							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+						}
+						return;
+					}
+					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+					return;
+				}
 			}
 		}
 	}

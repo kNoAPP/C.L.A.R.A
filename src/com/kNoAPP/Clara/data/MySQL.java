@@ -39,7 +39,6 @@ public class MySQL {
 			openConnection();
 			Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Connected to Database: " + database);
 		} catch (ClassNotFoundException | SQLException e) {
-			e.printStackTrace();
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Connection failed.");
 			connection = null;
 			return false;

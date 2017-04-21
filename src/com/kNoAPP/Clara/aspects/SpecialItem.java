@@ -17,12 +17,20 @@ public enum SpecialItem {
 	NEW_SETUP(ChatColor.GREEN + "New Setup", 1, (byte)5, Material.STAINED_GLASS_PANE,
 			new String[]{ChatColor.GRAY + "Create a new setup..."}, null, null),
 	
-	CHANGE_NAME(ChatColor.DARK_PURPLE + "Change Name", 1, (byte)0, Material.BOOK_AND_QUILL,
-			new String[]{ChatColor.GRAY + "Change this environment's name!"}, null, null),
+	MANAGE_PLUGINS(ChatColor.GOLD + "Manage Plugins", 1, (byte)0, Material.ANVIL,
+			new String[]{ChatColor.GRAY + "Add/Remove plugins to this setup"}, null, null),
 	START_SERVER(ChatColor.GREEN + "Start Server", 1, (byte)0, Material.EMERALD_BLOCK,
 			new String[]{ChatColor.GRAY + "Start this server setup"}, null, null),
+	LOADED_SERVER(ChatColor.YELLOW + "Locked Server", 1, (byte)0, Material.GOLD_BLOCK,
+			new String[]{ChatColor.GRAY + "Please stop your current setup", ChatColor.GRAY + "in order to boot this one"}, null, null),
 	STOP_SERVER(ChatColor.RED + "Stop Server", 1, (byte)0, Material.REDSTONE_BLOCK,
-			new String[]{ChatColor.GRAY + "Stop this server setup"}, null, null);
+			new String[]{ChatColor.GRAY + "Stop this server setup"}, null, null),
+	CHANGE_NAME(ChatColor.DARK_PURPLE + "Change Name", 1, (byte)0, Material.BOOK_AND_QUILL,
+			new String[]{ChatColor.GRAY + "Change this environment's name"}, null, null),
+	CHANGE_ICON(ChatColor.AQUA + "Change Icon", 1, (byte)0, Material.EYE_OF_ENDER,
+			new String[]{ChatColor.GRAY + "Change this setups icon"}, null, null),
+	DELETE_ENVIRONMENT(ChatColor.DARK_RED + "Delete Setup", 1, (byte)0, Material.BARRIER,
+			new String[]{ChatColor.GRAY + "(A really long time...)"}, null, null);
 	
 	private String name;
 	private int count;
@@ -46,28 +54,63 @@ public enum SpecialItem {
 		return name;
 	}
 	
+	public SpecialItem setName(String name) {
+		this.name = name;
+		return this;
+	}
+	
 	public int getCount() {
 		return count;
+	}
+	
+	public SpecialItem setCount(int count) {
+		this.count = count;
+		return this;
 	}
 	
 	public byte getData() {
 		return data;
 	}
 	
+	public SpecialItem setData(byte data) {
+		this.data = data;
+		return this;
+	}
+	
 	public Material getMaterial() {
 		return m;
+	}
+	
+	public SpecialItem setMaterial(Material m) {
+		this.m = m;
+		return this;
 	}
 	
 	public String[] getLores() {
 		return lores;
 	}
 	
+	public SpecialItem setLores(String[] lores) {
+		this.lores = lores;
+		return this;
+	}
+	
 	public Enchantment[] getEnchantments() {
 		return enchants;
 	}
 	
+	public SpecialItem setEnchantments(Enchantment[] enchants) {
+		this.enchants = enchants;
+		return this;
+	}
+	
 	public ItemFlag[] getItemFlags() {
 		return itemFlags;
+	}
+	
+	public SpecialItem setItemFlags(ItemFlag[] itemFlags) {
+		this.itemFlags = itemFlags;
+		return this;
 	}
 	
 	public ItemStack getItem() {

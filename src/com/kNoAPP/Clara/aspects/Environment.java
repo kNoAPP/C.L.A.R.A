@@ -126,7 +126,7 @@ public class Environment {
 		environments.remove(this);
 	}
 	
-	public void load() {
+	public void load() {		
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Loading Environment [" + getName() + "]");
 		if(isMissingPlugins(false)) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] This setup is missing plugins!");
@@ -152,21 +152,51 @@ public class Environment {
 			f.delete();
 		}
 		
+		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+		fc.set("Active", 0);
+		Data.ENVIRONMENT.saveDataFile(fc);
+		
 		Bukkit.reload(); //Try this
 	}
 	
 	public Inventory getSubInventory() {
 		Inventory inv = Bukkit.createInventory(null, 54, name);
 		inv.setItem(4, getItem());
-		inv.setItem(22, SpecialItem.CHANGE_NAME.getItem());
-		inv.setItem(19, SpecialItem.START_SERVER.getItem());
-		inv.setItem(37, SpecialItem.STOP_SERVER.getItem());
+		inv.setItem(25, SpecialItem.MANAGE_PLUGINS.getItem());
+		if(getThisEnvironment() == null) inv.setItem(19, SpecialItem.START_SERVER.getItem());
+		else if(getThisEnvironment() == this) inv.setItem(19, SpecialItem.STOP_SERVER.getItem());
+		else inv.setItem(19, SpecialItem.LOADED_SERVER.getItem());
+		inv.setItem(37, SpecialItem.CHANGE_NAME.getItem());
+		inv.setItem(40, SpecialItem.CHANGE_ICON.getItem());
+		inv.setItem(43, SpecialItem.DELETE_ENVIRONMENT.getItem());
 		return inv;
 	}
 	
 	public void openSubInventory(Player p) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 		p.openInventory(getSubInventory());
+	}
+	
+	public static Environment createBasicSetup() {
+		int aID = nextOpenID();
+		Environment e = new Environment("Setup-" + aID, aID);
+		e.add();
+		return e;
+	}
+	
+	private static int nextOpenID() {
+		boolean found = false;
+		int id = 0;
+		while(!found) {
+			id++;
+			found = true;
+			for(Environment e : environments) {
+				if(e.getID() == id) {
+					found = false;
+				}
+			}
+		}
+		return id;
 	}
 	
 	public static void importEnvironments() {
