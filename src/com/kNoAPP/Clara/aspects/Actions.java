@@ -5,12 +5,21 @@ import java.io.File;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.scheduler.BukkitRunnable;
+
+import com.kNoAPP.Clara.Clara;
 
 public class Actions implements Listener {
+	
+	public boolean bugPrevention = false;
 
 	@EventHandler
 	public void onInteract(InventoryClickEvent e) {
@@ -63,9 +72,14 @@ public class Actions implements Listener {
 						return;
 					}
 					if(is.isSimilar(SpecialItem.CHANGE_NAME.getItem())) {
+						p.closeInventory();
+						Environment.changingName.put(p.getName(), env);
+						p.sendMessage(Message.INFO.getMessage("Please type your new Environment name."));
+						p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 						return;
 					}
 					if(is.isSimilar(SpecialItem.CHANGE_ICON.getItem())) {
+						env.openIconInventory(p);
 						return;
 					}
 					if(is.isSimilar(SpecialItem.DELETE_ENVIRONMENT.getItem())) {
@@ -99,7 +113,59 @@ public class Actions implements Listener {
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 					return;
 				}
+				if(inv.getName().equals(env.getIconInventory().getName())) {
+					if(is.isSimilar(SpecialItem.PLACE_HOLDER.getItem())) {
+						e.setCancelled(true);
+						p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+						return;
+					}
+				}
 			}
+		}
+	}
+	
+	@EventHandler
+	public void onClose(InventoryCloseEvent e) {
+		Player p = (Player) e.getPlayer();
+		Inventory inv = e.getInventory();
+		for(Environment env : Environment.environments) {
+			if(inv.getName().equals(env.getIconInventory().getName())) {
+				ItemStack is = inv.getItem(4);
+				if(is != null) {
+					bugPrevention = true;
+					env.setIcon(is.getType());
+					p.sendMessage(Message.INFO.getMessage("Updated icon: " + is.getType().toString() + "!"));
+					
+					new BukkitRunnable() {
+						public void run() {
+							env.openSubInventory(p);
+						}
+					}.runTaskLater(Clara.getPlugin(), 2L);
+					return;
+				}
+			}
+		}
+	}
+	
+	@EventHandler
+	public void onLeave(PlayerQuitEvent e) {
+		Player p = e.getPlayer();
+		Environment.changingName.remove(p.getName());
+	}
+	
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onChat(AsyncPlayerChatEvent e) {
+		Player p = e.getPlayer();
+		String m = e.getMessage();
+		if(Environment.changingName.containsKey(p.getName())) {
+			e.setCancelled(true);
+			Environment env = Environment.changingName.get(p.getName());
+			Environment.changingName.remove(p.getName());
+			
+			env.setName(m);
+			p.sendMessage(Message.INFO.getMessage("Updated Environment name to " + m + "."));
+			env.openSubInventory(p);
+			return;
 		}
 	}
 }

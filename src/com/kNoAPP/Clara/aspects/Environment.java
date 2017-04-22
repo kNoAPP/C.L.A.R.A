@@ -3,6 +3,7 @@ package com.kNoAPP.Clara.aspects;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -25,6 +26,7 @@ import com.kNoAPP.Clara.utils.Tools;
 public class Environment {
 
 	public static List<Environment> environments = new ArrayList<Environment>();
+	public static HashMap<String, Environment> changingName = new HashMap<String, Environment>();
 	
 	private String name;
 	private int id;
@@ -60,12 +62,20 @@ public class Environment {
 		return name;
 	}
 	
+	public void setName(String name) {
+		this.name = name;
+	}
+	
 	public int getID() {
 		return id;
 	}
 	
 	public Material getIcon() {
 		return icon;
+	}
+	
+	public void setIcon(Material icon) {
+		this.icon = icon;
 	}
 	
 	public List<String> getPluginNames() {
@@ -235,6 +245,22 @@ public class Environment {
 	public void openMPInventory(Player p) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 		p.openInventory(getMPInventory());
+	}
+	
+	public Inventory getIconInventory() {
+		Inventory inv = Bukkit.createInventory(null, 9, name + " - Change Icon");
+		for(int a=0; a<9; a++) {
+			if(a != 4) {
+				inv.setItem(a, SpecialItem.PLACE_HOLDER.getItem());
+			}
+		}
+		return inv;
+	}
+	
+	public void openIconInventory(Player p) {
+		p.sendMessage(Message.INFO.getMessage("Place your icon in the inventory!"));
+		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.openInventory(getIconInventory());
 	}
 	
 	public static Environment createBasicSetup() {
