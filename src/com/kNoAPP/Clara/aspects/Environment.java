@@ -1,7 +1,6 @@
 package com.kNoAPP.Clara.aspects;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +10,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -18,21 +18,26 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.Clara;
+import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.utils.Tools;
 
 public class Environment {
 
 	public static List<Environment> environments = new ArrayList<Environment>();
+	
 	public static HashMap<String, Environment> changingName = new HashMap<String, Environment>();
+	public static HashMap<String, Object[]> settingWorld = new HashMap<String, Object[]>();
 	
 	private String name;
 	private int id;
 	private Material icon;
 	
 	private List<String> pluginNames;
+	private List<EWorld> worlds;
 	
 	public Environment(String name, int id) {
 		this.name = name;
@@ -40,6 +45,7 @@ public class Environment {
 		icon = Material.PAPER;
 		
 		pluginNames = new ArrayList<String>();
+		worlds = new ArrayList<EWorld>();
 	}
 	
 	public Environment(String name, int id, Material icon) {
@@ -48,14 +54,16 @@ public class Environment {
 		this.icon = icon;
 		
 		pluginNames = new ArrayList<String>();
+		worlds = new ArrayList<EWorld>();
 	}
 	
-	public Environment(String name, int id, Material icon, List<String> pluginNames) {
+	public Environment(String name, int id, Material icon, List<String> pluginNames, List<EWorld> worlds) {
 		this.name = name;
 		this.id = id;
 		this.icon = icon;
 		
 		this.pluginNames = pluginNames;
+		this.worlds = worlds;
 	}
 	
 	public String getName() {
@@ -82,6 +90,19 @@ public class Environment {
 		return pluginNames;
 	}
 	
+	public List<EWorld> getWorlds() {
+		return worlds;
+	}
+	
+	public List<String> serializeWorlds() {
+		List<String> sWorlds = new ArrayList<String>();
+		for(EWorld ew : worlds) {
+			String sWorld = ew.getName() + ";" + ew.getCopiedName();
+			sWorlds.add(sWorld);
+		}
+		return sWorlds;
+	}
+	
 	public void addPlugin(File f) { //Could be String
 		pluginNames.add(f.getName());
 	}
@@ -90,8 +111,20 @@ public class Environment {
 		pluginNames.remove(f.getName());
 	}
 	
+	public void addWorld(EWorld ew) {
+		worlds.add(ew);
+	}
+	
+	public void removeWorld(EWorld ew) {
+		worlds.remove(ew);
+	}
+	
 	public boolean isMissingPlugins(boolean local) {
 		return Tools.convertBoolean(getMissingPlugins(local).size());
+	}
+	
+	public boolean isMissingWorlds(boolean local) {
+		return Tools.convertBoolean(getMissingWorlds(local).size());
 	}
 	
 	public List<String> getMissingPlugins(boolean local) {
@@ -112,6 +145,28 @@ public class Environment {
 		return pluginFiles;
 	}
 	
+	public List<EWorld> getMissingWorlds(boolean local) {
+		List<EWorld> worldFiles = new ArrayList<EWorld>();
+		File source;
+		if(local) source = Bukkit.getWorldContainer();
+		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		File[] targets = source.listFiles();
+		
+		for(EWorld ew : worlds) {
+			boolean m = true;
+			for(File target : targets) {
+				if(local && target.getName().equals(ew.getCopiedName())) {
+					m = false;
+				}
+				if(!local && target.getName().equals(ew.getName())) {
+					m = false;
+				}
+			}
+			if(m) worldFiles.add(ew);
+		}
+		return worldFiles;
+	}
+	
 	/**
 	 * Gets plugins involved with the current Environment only
 	 * @param local plugin(t) or database folder(f)
@@ -129,6 +184,38 @@ public class Environment {
 			}
 		}
 		return pluginFiles;
+	}
+	
+	public List<File> getWorlds(boolean local) {
+		List<File> worldFiles = new ArrayList<File>();
+		File source;
+		if(local) source = Bukkit.getWorldContainer();
+		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		File[] targets = source.listFiles();
+		
+		for(File target : targets) {
+			for(EWorld ew : worlds) {
+				if(local && target.getName().equals(ew.getCopiedName()) && target.isDirectory()) {
+					worldFiles.add(target);
+				}
+				if(!local && target.getName().equals(ew.getName()) && target.isDirectory()) {
+					worldFiles.add(target);
+				}
+			}
+		}
+		return worldFiles;
+	}
+	
+	public EWorld getEWorld(String n, boolean local) {
+		for(EWorld ew : worlds) {
+			if(local && n.equals(ew.getCopiedName())) {
+				return ew;
+			}
+			if(!local && n.equals(ew.getName())) {
+				return ew;
+			}
+		}
+		return null;
 	}
 	
 	public ItemStack getItem() {
@@ -164,39 +251,120 @@ public class Environment {
 			}
 		}
 		
-		File d = new File(Bukkit.getWorldContainer(), "plugins");
-		for(File f : getPlugins(false)) {
-			try {FileUtils.copyFileToDirectory(f, d);} 
-			catch (IOException ex) {ex.printStackTrace();}
+		long delay = 0;
+		if(getWorlds(false).size() != 0) {
+			delay = 20L;
+			Server transfer = Server.transferServer(Server.getThisServer());
+			for(Player pl : Bukkit.getOnlinePlayers()) {
+				if(transfer != null) {
+					pl.sendMessage(Message.WARN.getMessage("This server is changing setups!"));
+					pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+					BungeeAPI.connect(pl, transfer.getName());
+				} else {
+					pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!"));
+				}
+			}
 		}
 		
-		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
-		fc.set("Active", getID());
-		Data.ENVIRONMENT.saveDataFile(fc);
+		//Removes/Unloads Worlds
+		new BukkitRunnable() {
+			public void run() {
+				for(File f : getWorlds(false)) {
+					EWorld ew = getEWorld(f.getName(), false);
+					File d = new File(Bukkit.getWorldContainer(), ew.getCopiedName());
+					if(d.exists()) {
+						World w = Bukkit.getWorld(d.getName());
+						if(w != null) {
+							w.setAutoSave(false);
+							Bukkit.getServer().unloadWorld(w.getName(), true);
+							try {FileUtils.deleteDirectory(d);}
+							catch(Exception ex) {ex.printStackTrace();}
+						}
+					}
+				}
+			}
+		}.runTaskLater(Clara.getPlugin(), delay);
 		
-		Bukkit.reload(); //Try this
+		new BukkitRunnable() {
+			public void run() {
+				File d;
+				d = new File(Bukkit.getWorldContainer(), "plugins");
+				for(File f : getPlugins(false)) {
+					try {FileUtils.copyFileToDirectory(f, d);} 
+					catch(Exception ex) {ex.printStackTrace();}
+				}
+				
+				//Copies Worlds
+				for(File f : getWorlds(false)) {
+					EWorld ew = getEWorld(f.getName(), false);
+					d = new File(Bukkit.getWorldContainer(), ew.getCopiedName());
+
+					try {FileUtils.copyDirectory(f, d);}
+					catch(Exception ex) {ex.printStackTrace();}
+				}
+				
+				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+				fc.set("Active", getID());
+				Data.ENVIRONMENT.saveDataFile(fc);
+				
+				if(getWorlds(false).size() == 0) {
+					Bukkit.reload(); //Try this
+				} else {
+					Bukkit.shutdown();
+				}
+			}
+		}.runTaskLater(Clara.getPlugin(), 2*delay);
 	}
 	
 	public void unload() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Unloading Environment [" + getName() + "]");
-		for(File f : getPlugins(true)) {
-			Bukkit.getConsoleSender().sendMessage(ChatColor.AQUA + f.getName());
-			try{f.delete();}
-			catch(Exception ex) {ex.printStackTrace();}
+		
+		long delay = 0;
+		if(getWorlds(false).size() != 0) {
+			delay = 20L;
+			Server transfer = Server.transferServer(Server.getThisServer());
+			for(Player pl : Bukkit.getOnlinePlayers()) {
+				if(transfer != null) {
+					pl.sendMessage(Message.WARN.getMessage("This server is changing setups!"));
+					pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+					BungeeAPI.connect(pl, transfer.getName());
+				} else {
+					pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!"));
+				}
+			}
 		}
 		
-		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
-		fc.set("Active", 0);
-		Data.ENVIRONMENT.saveDataFile(fc);
-		
-		Bukkit.reload(); //Try this
+		new BukkitRunnable() {
+			public void run() {
+				for(File f : getPlugins(true)) {
+					try{f.delete();}
+					catch(Exception ex) {ex.printStackTrace();}
+				}
+				
+				for(File f : getWorlds(true)) {
+					try{FileUtils.deleteDirectory(f);}
+					catch(Exception ex) {ex.printStackTrace();}
+				}
+				
+				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+				fc.set("Active", 0);
+				Data.ENVIRONMENT.saveDataFile(fc);
+				
+				if(getWorlds(false).size() == 0) {
+					Bukkit.reload(); //Try this
+				} else {
+					Bukkit.shutdown();
+				}
+			}
+		}.runTaskLater(Clara.getPlugin(), 2*delay);
 	}
 	
 	public Inventory getSubInventory() {
 		Inventory inv = Bukkit.createInventory(null, 54, name);
 		inv.setItem(0, SpecialItem.BACK.getItem());
 		inv.setItem(4, getItem());
-		inv.setItem(25, SpecialItem.MANAGE_PLUGINS.getItem());
+		inv.setItem(22, SpecialItem.MANAGE_PLUGINS.getItem());
+		inv.setItem(25, SpecialItem.MANAGE_WORLDS.getItem());
 		if(getThisEnvironment() == null) inv.setItem(19, SpecialItem.START_SERVER.getItem());
 		else if(getThisEnvironment() == this) inv.setItem(19, SpecialItem.STOP_SERVER.getItem());
 		else inv.setItem(19, SpecialItem.LOADED_SERVER.getItem());
@@ -245,6 +413,45 @@ public class Environment {
 	public void openMPInventory(Player p) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 		p.openInventory(getMPInventory());
+	}
+	
+	public Inventory getMWInventory() {
+		Inventory inv = Bukkit.createInventory(null, 54, name + " - Worlds");
+		int a = 0;
+		for(File f : getAllFiles(false)) {
+			if(f.isDirectory() && a < 45) {
+				inv.setItem(a, getMWItem(f));
+				a++;
+			}
+		}
+		
+		inv.setItem(49, SpecialItem.BACK.getItem());
+		return inv;
+	}
+	
+	public ItemStack getMWItem(File f) {
+		ItemStack is = new ItemStack(Material.PAPER, 1);
+		ItemMeta im = is.getItemMeta();
+		
+		im.setDisplayName(ChatColor.YELLOW + f.getName());
+		List<String> lores = new ArrayList<String>();
+		for(EWorld ew : worlds) {
+			if(ew.getName().equals(f.getName())) {
+				im.addEnchant(Enchantment.ARROW_INFINITE, 1, false);
+				im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+				lores.add(ChatColor.GREEN + "Selected!");
+				lores.add(ChatColor.GOLD + ew.getCopiedName());
+			}
+		}
+		lores.add(ChatColor.GRAY + f.getParentFile().getPath());
+		im.setLore(lores);
+		is.setItemMeta(im);
+		return is;
+	}
+	
+	public void openMWInventory(Player p) {
+		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.openInventory(getMWInventory());
 	}
 	
 	public Inventory getIconInventory() {
@@ -303,7 +510,13 @@ public class Environment {
 				int id = fc.getInt("Environment." + name + ".id");
 				Material icon = Material.getMaterial(fc.getString("Environment." + name + ".icon"));
 				List<String> pluginNames = fc.getStringList("Environment." + name + ".plugins");
-				new Environment(name, id, icon, pluginNames).add();
+				List<EWorld> worlds = new ArrayList<EWorld>();
+				if(fc.getStringList("Environment." + name + ".worlds") != null) {
+					for(String s : fc.getStringList("Environment." + name + ".worlds")) {
+						worlds.add(EWorld.deserialize(s));
+					}
+				}
+				new Environment(name, id, icon, pluginNames, worlds).add();
 			}
 		}
 	}
@@ -315,6 +528,7 @@ public class Environment {
 			fc.set("Environment." + e.getName() + ".id", e.getID());
 			fc.set("Environment." + e.getName() + ".icon", e.getIcon().toString());
 			fc.set("Environment." + e.getName() + ".plugins", e.getPluginNames());
+			fc.set("Environment." + e.getName() + ".worlds", e.serializeWorlds());
 		}
 		Data.ENVIRONMENT.saveDataFile(fc);
 	}

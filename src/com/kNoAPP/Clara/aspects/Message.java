@@ -8,6 +8,7 @@ public enum Message {
 	ARGS(ChatColor.GOLD + "Missing Args> "),
 	USAGE(ChatColor.GOLD + "Usage> "),
 	INFO(ChatColor.GOLD + "Info> "),
+	WARN(ChatColor.GOLD + "Warn> "),
 	
 	HELP("  ");
 	
@@ -27,6 +28,9 @@ public enum Message {
 		}
 		if(this == ARGS || this == USAGE || this == INFO || this == HELP) {
 			return prefix + ChatColor.GRAY + s;
+		}
+		if(this == WARN) {
+			return prefix + ChatColor.RED + s;
 		}
 		return null;
 	}

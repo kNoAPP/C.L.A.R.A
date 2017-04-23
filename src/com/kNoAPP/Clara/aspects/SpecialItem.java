@@ -23,6 +23,8 @@ public enum SpecialItem {
 	
 	MANAGE_PLUGINS(ChatColor.GOLD + "Manage Plugins", 1, (byte)0, Material.ANVIL,
 			new String[]{ChatColor.GRAY + "Add/Remove plugins to this setup"}, null, null),
+	MANAGE_WORLDS(ChatColor.GOLD + "Manage Worlds", 1, (byte)0, Material.BOOK,
+			new String[]{ChatColor.GRAY + "Add/remove worlds to this setup"}, null, null),
 	START_SERVER(ChatColor.GREEN + "Start Server", 1, (byte)0, Material.EMERALD_BLOCK,
 			new String[]{ChatColor.GRAY + "Start this server setup"}, null, null),
 	LOADED_SERVER(ChatColor.YELLOW + "Locked Server", 1, (byte)0, Material.GOLD_BLOCK,

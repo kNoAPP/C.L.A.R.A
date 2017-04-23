@@ -124,4 +124,13 @@ public class Server {
 			}
 		}
 	}
+	
+	public static Server transferServer(Server from) {
+		for(Server s : servers) {
+			if(s != from && s.isOnline()) {
+				return s;
+			}
+		}
+		return null;
+	}
 }
