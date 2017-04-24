@@ -39,6 +39,9 @@ public class Environment {
 	private List<String> pluginNames;
 	private List<EWorld> worlds;
 	
+	private boolean forceRestart;
+	private boolean loadFreshWorld;
+	
 	public Environment(String name, int id) {
 		this.name = name;
 		this.id = id;
@@ -46,6 +49,9 @@ public class Environment {
 		
 		pluginNames = new ArrayList<String>();
 		worlds = new ArrayList<EWorld>();
+		
+		forceRestart = false;
+		loadFreshWorld = false;
 	}
 	
 	public Environment(String name, int id, Material icon) {
@@ -55,15 +61,21 @@ public class Environment {
 		
 		pluginNames = new ArrayList<String>();
 		worlds = new ArrayList<EWorld>();
+		
+		forceRestart = false;
+		loadFreshWorld = false;
 	}
 	
-	public Environment(String name, int id, Material icon, List<String> pluginNames, List<EWorld> worlds) {
+	public Environment(String name, int id, Material icon, List<String> pluginNames, List<EWorld> worlds, boolean forceRestart, boolean loadFreshWorld) {
 		this.name = name;
 		this.id = id;
 		this.icon = icon;
 		
 		this.pluginNames = pluginNames;
 		this.worlds = worlds;
+		
+		this.forceRestart = forceRestart;
+		this.loadFreshWorld = loadFreshWorld;
 	}
 	
 	public String getName() {
@@ -76,6 +88,22 @@ public class Environment {
 	
 	public int getID() {
 		return id;
+	}
+	
+	public boolean forceRestart() {
+		return forceRestart;
+	}
+	
+	public void setForceRestart(boolean forceRestart) {
+		this.forceRestart = forceRestart;
+	}
+	
+	public boolean loadFreshWorld() {
+		return loadFreshWorld;
+	}
+	
+	public void setLoadFreshWorld(boolean loadFreshWorld) {
+		this.loadFreshWorld = loadFreshWorld;
 	}
 	
 	public Material getIcon() {
@@ -267,6 +295,7 @@ public class Environment {
 		}
 		
 		//Removes/Unloads Worlds
+		/*
 		new BukkitRunnable() {
 			public void run() {
 				for(File f : getWorlds(false)) {
@@ -284,30 +313,18 @@ public class Environment {
 				}
 			}
 		}.runTaskLater(Clara.getPlugin(), delay);
+		*/
 		
 		new BukkitRunnable() {
 			public void run() {
-				File d;
-				d = new File(Bukkit.getWorldContainer(), "plugins");
-				for(File f : getPlugins(false)) {
-					try {FileUtils.copyFileToDirectory(f, d);} 
-					catch(Exception ex) {ex.printStackTrace();}
-				}
-				
-				//Copies Worlds
-				for(File f : getWorlds(false)) {
-					EWorld ew = getEWorld(f.getName(), false);
-					d = new File(Bukkit.getWorldContainer(), ew.getCopiedName());
-
-					try {FileUtils.copyDirectory(f, d);}
-					catch(Exception ex) {ex.printStackTrace();}
-				}
+				loadPlugins();
+				loadWorlds();
 				
 				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 				fc.set("Active", getID());
 				Data.ENVIRONMENT.saveDataFile(fc);
 				
-				if(getWorlds(false).size() == 0) {
+				if(getWorlds(false).size() == 0 && !forceRestart()) {
 					Bukkit.reload(); //Try this
 				} else {
 					Bukkit.shutdown();
@@ -336,21 +353,14 @@ public class Environment {
 		
 		new BukkitRunnable() {
 			public void run() {
-				for(File f : getPlugins(true)) {
-					try{f.delete();}
-					catch(Exception ex) {ex.printStackTrace();}
-				}
-				
-				for(File f : getWorlds(true)) {
-					try{FileUtils.deleteDirectory(f);}
-					catch(Exception ex) {ex.printStackTrace();}
-				}
+				unloadPlugins();
+				unloadWorlds();
 				
 				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 				fc.set("Active", 0);
 				Data.ENVIRONMENT.saveDataFile(fc);
 				
-				if(getWorlds(false).size() == 0) {
+				if(getWorlds(false).size() == 0 && !forceRestart()) {
 					Bukkit.reload(); //Try this
 				} else {
 					Bukkit.shutdown();
@@ -359,9 +369,50 @@ public class Environment {
 		}.runTaskLater(Clara.getPlugin(), 2*delay);
 	}
 	
+	public void loadPlugins() {
+		File d = new File(Bukkit.getWorldContainer(), "plugins");
+		for(File f : getPlugins(false)) {
+			try {FileUtils.copyFileToDirectory(f, d);} 
+			catch(Exception ex) {ex.printStackTrace();}
+		}
+	}
+	
+	public void unloadPlugins() {
+		for(File f : getPlugins(true)) {
+			try{f.delete();}
+			catch(Exception ex) {ex.printStackTrace();}
+		}
+	}
+	
+	public void loadWorlds() {
+		for(File f : getWorlds(false)) {
+			EWorld ew = getEWorld(f.getName(), false);
+			File d = new File(Bukkit.getWorldContainer(), ew.getCopiedName());
+			if(d.exists()) {
+				World w = Bukkit.getWorld(d.getName());
+				if(w != null) {
+					w.setAutoSave(false);
+					Bukkit.getServer().unloadWorld(w.getName(), true);
+					try {FileUtils.deleteDirectory(d);}
+					catch(Exception ex) {ex.printStackTrace();}
+				}
+			}
+			try {FileUtils.copyDirectory(f, d);}
+			catch(Exception ex) {ex.printStackTrace();}
+		}
+	}
+	
+	public void unloadWorlds() {
+		for(File f : getWorlds(true)) {
+			try{FileUtils.deleteDirectory(f);}
+			catch(Exception ex) {ex.printStackTrace();}
+		}
+	}
+	
 	public Inventory getSubInventory() {
 		Inventory inv = Bukkit.createInventory(null, 54, name);
 		inv.setItem(0, SpecialItem.BACK.getItem());
+		inv.setItem(8, SpecialItem.SETTINGS.getItem());
 		inv.setItem(4, getItem());
 		inv.setItem(22, SpecialItem.MANAGE_PLUGINS.getItem());
 		inv.setItem(25, SpecialItem.MANAGE_WORLDS.getItem());
@@ -377,6 +428,21 @@ public class Environment {
 	public void openSubInventory(Player p) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 		p.openInventory(getSubInventory());
+	}
+	
+	public Inventory getSettingsInventory() {
+		Inventory inv = Bukkit.createInventory(null, 9, name + " - Settings");
+		if(loadFreshWorld) inv.setItem(0, SpecialItem.LOAD_WORLD_TRUE.getItem());
+		else inv.setItem(0, SpecialItem.LOAD_WORLD_FALSE.getItem());
+		if(forceRestart) inv.setItem(1, SpecialItem.FORCE_RESTART_TRUE.getItem());
+		else inv.setItem(1, SpecialItem.FORCE_RESTART_FALSE.getItem());
+		inv.setItem(8, SpecialItem.BACK.getItem());
+		return inv;
+	}
+	
+	public void openSettingsInventory(Player p) {
+		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.openInventory(getSettingsInventory());
 	}
 	
 	public Inventory getMPInventory() {
@@ -516,7 +582,11 @@ public class Environment {
 						worlds.add(EWorld.deserialize(s));
 					}
 				}
-				new Environment(name, id, icon, pluginNames, worlds).add();
+				
+				boolean forceRestart = fc.getBoolean("Environment." + name + ".settings.FR");
+				boolean loadFreshWorld = fc.getBoolean("Environment." + name + ".settings.LFW");
+				new Environment(name, id, icon, pluginNames, worlds, 
+						forceRestart, loadFreshWorld).add();
 			}
 		}
 	}
@@ -529,6 +599,9 @@ public class Environment {
 			fc.set("Environment." + e.getName() + ".icon", e.getIcon().toString());
 			fc.set("Environment." + e.getName() + ".plugins", e.getPluginNames());
 			fc.set("Environment." + e.getName() + ".worlds", e.serializeWorlds());
+			
+			fc.set("Environment." + e.getName() + ".settings.FR", e.forceRestart());
+			fc.set("Environment." + e.getName() + ".settings.LFW", e.loadFreshWorld());
 		}
 		Data.ENVIRONMENT.saveDataFile(fc);
 	}

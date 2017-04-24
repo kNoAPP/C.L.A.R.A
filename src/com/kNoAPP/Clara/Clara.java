@@ -124,6 +124,10 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		getPlugin().getLogger().info("Exporting Aspects...");
 		if(!failed) {
 			Server.getThisServer().setOnline(false, true);
+			
+			Environment tenv = Environment.getThisEnvironment();
+			if(tenv != null) if(tenv.loadFreshWorld()) tenv.loadWorlds();
+			
 			Environment.exportEnvironments();
 		}
 	}

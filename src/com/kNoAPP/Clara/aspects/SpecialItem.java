@@ -20,6 +20,8 @@ public enum SpecialItem {
 			new String[]{ChatColor.GRAY + "Go back to the previous menu"}, null, null),
 	PLACE_HOLDER(ChatColor.GREEN + "<>", 1, (byte)5, Material.STAINED_GLASS_PANE,
 			null, null, null),
+	SETTINGS(ChatColor.DARK_GRAY + "Settings", 1, (byte)0, Material.SPECKLED_MELON,
+			new String[]{ChatColor.GRAY + "Manage this setup"}, null, null),
 	
 	MANAGE_PLUGINS(ChatColor.GOLD + "Manage Plugins", 1, (byte)0, Material.ANVIL,
 			new String[]{ChatColor.GRAY + "Add/Remove plugins to this setup"}, null, null),
@@ -32,11 +34,22 @@ public enum SpecialItem {
 	STOP_SERVER(ChatColor.RED + "Stop Server", 1, (byte)0, Material.REDSTONE_BLOCK,
 			new String[]{ChatColor.GRAY + "Stop this server setup"}, null, null),
 	CHANGE_NAME(ChatColor.DARK_PURPLE + "Change Name", 1, (byte)0, Material.BOOK_AND_QUILL,
-			new String[]{ChatColor.GRAY + "Change this environment's name"}, null, null),
+			new String[]{ChatColor.GRAY + "Change this setup's name"}, null, null),
 	CHANGE_ICON(ChatColor.AQUA + "Change Icon", 1, (byte)0, Material.EYE_OF_ENDER,
-			new String[]{ChatColor.GRAY + "Change this setups icon"}, null, null),
+			new String[]{ChatColor.GRAY + "Change this setup's icon"}, null, null),
 	DELETE_ENVIRONMENT(ChatColor.DARK_RED + "Delete Setup", 1, (byte)0, Material.BARRIER,
-			new String[]{ChatColor.GRAY + "(A really long time...)"}, null, null);
+			new String[]{ChatColor.GRAY + "(A really long time...)"}, null, null),
+	
+	LOAD_WORLD_FALSE(ChatColor.AQUA + "World Load", 1, (byte)0, Material.EMPTY_MAP,
+			new String[]{ChatColor.GRAY + "Load fresh world on startup"}, null, null),
+	LOAD_WORLD_TRUE(ChatColor.AQUA + "World Load", 1, (byte)0, Material.EMPTY_MAP,
+			new String[]{ChatColor.GREEN + "Selected!", ChatColor.GRAY + "Load fresh world on startup"}, 
+			new Enchantment[]{Enchantment.ARROW_INFINITE}, new ItemFlag[]{ItemFlag.HIDE_ENCHANTS}),
+	FORCE_RESTART_FALSE(ChatColor.RED + "Restart on Enable", 1, (byte)0, Material.BONE,
+			new String[]{ChatColor.GRAY + "Restart on enable/disable"}, null, null),
+	FORCE_RESTART_TRUE(ChatColor.RED + "Restart on Enable", 1, (byte)0, Material.BONE,
+			new String[]{ChatColor.GREEN + "Selected!", ChatColor.GRAY + "Restart on enable/disable"},
+			new Enchantment[]{Enchantment.ARROW_INFINITE}, new ItemFlag[]{ItemFlag.HIDE_ENCHANTS});
 	
 	private String name;
 	private int count;

@@ -2,6 +2,7 @@ package com.kNoAPP.Clara.aspects;
 
 import java.io.File;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -10,6 +11,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -49,6 +51,10 @@ public class Actions implements Listener {
 					e.setCancelled(true);
 					if(is.isSimilar(SpecialItem.BACK.getItem())) {
 						Environment.openMainInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.SETTINGS.getItem())) {
+						env.openSettingsInventory(p);
 						return;
 					}
 					if(is.isSimilar(SpecialItem.START_SERVER.getItem())) {
@@ -106,6 +112,35 @@ public class Actions implements Listener {
 							p.sendMessage(Message.INFO.getMessage("Cannot remove a loaded setup!"));
 							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 						}
+						return;
+					}
+					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+					return;
+				}
+				if(inv.getName().equals(env.getSettingsInventory().getName())) {
+					e.setCancelled(true);
+					if(is.isSimilar(SpecialItem.BACK.getItem())) {
+						env.openSubInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.LOAD_WORLD_FALSE.getItem())) {
+						env.setLoadFreshWorld(true);
+						env.openSettingsInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.LOAD_WORLD_TRUE.getItem())) {
+						env.setLoadFreshWorld(false);
+						env.openSettingsInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.FORCE_RESTART_FALSE.getItem())) {
+						env.setForceRestart(true);
+						env.openSettingsInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.FORCE_RESTART_TRUE.getItem())) {
+						env.setForceRestart(false);
+						env.openSettingsInventory(p);
 						return;
 					}
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
@@ -230,6 +265,16 @@ public class Actions implements Listener {
 				p.sendMessage(Message.INFO.getMessage("Copy name already in use! [" + preW.getName() + ", " + preW.getCopiedName() + "]"));
 			}
 			return;
+		}
+	}
+	
+	@EventHandler
+	public void onCommand(PlayerCommandPreprocessEvent e) {
+		if(e.getMessage().equalsIgnoreCase("/reload")) {
+			if(Environment.getThisEnvironment().loadFreshWorld()) {
+				e.setCancelled(true);
+				Bukkit.shutdown();
+			}
 		}
 	}
 }
