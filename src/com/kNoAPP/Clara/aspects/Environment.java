@@ -432,10 +432,10 @@ public class Environment {
 	
 	public Inventory getSettingsInventory() {
 		Inventory inv = Bukkit.createInventory(null, 9, name + " - Settings");
-		if(loadFreshWorld) inv.setItem(0, SpecialItem.LOAD_WORLD_TRUE.getItem());
-		else inv.setItem(0, SpecialItem.LOAD_WORLD_FALSE.getItem());
-		if(forceRestart) inv.setItem(1, SpecialItem.FORCE_RESTART_TRUE.getItem());
-		else inv.setItem(1, SpecialItem.FORCE_RESTART_FALSE.getItem());
+		if(forceRestart) inv.setItem(0, SpecialItem.FORCE_RESTART_TRUE.getItem());
+		else inv.setItem(0, SpecialItem.FORCE_RESTART_FALSE.getItem());
+		if(loadFreshWorld) inv.setItem(1, SpecialItem.LOAD_WORLD_TRUE.getItem());
+		else inv.setItem(1, SpecialItem.LOAD_WORLD_FALSE.getItem());
 		inv.setItem(8, SpecialItem.BACK.getItem());
 		return inv;
 	}

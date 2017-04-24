@@ -45,9 +45,9 @@ public enum SpecialItem {
 	LOAD_WORLD_TRUE(ChatColor.AQUA + "World Load", 1, (byte)0, Material.EMPTY_MAP,
 			new String[]{ChatColor.GREEN + "Selected!", ChatColor.GRAY + "Load fresh world on startup"}, 
 			new Enchantment[]{Enchantment.ARROW_INFINITE}, new ItemFlag[]{ItemFlag.HIDE_ENCHANTS}),
-	FORCE_RESTART_FALSE(ChatColor.RED + "Restart on Enable", 1, (byte)0, Material.BONE,
+	FORCE_RESTART_FALSE(ChatColor.RED + "Restart on Enable", 1, (byte)0, Material.APPLE,
 			new String[]{ChatColor.GRAY + "Restart on enable/disable"}, null, null),
-	FORCE_RESTART_TRUE(ChatColor.RED + "Restart on Enable", 1, (byte)0, Material.BONE,
+	FORCE_RESTART_TRUE(ChatColor.RED + "Restart on Enable", 1, (byte)0, Material.APPLE,
 			new String[]{ChatColor.GREEN + "Selected!", ChatColor.GRAY + "Restart on enable/disable"},
 			new Enchantment[]{Enchantment.ARROW_INFINITE}, new ItemFlag[]{ItemFlag.HIDE_ENCHANTS});
 	
