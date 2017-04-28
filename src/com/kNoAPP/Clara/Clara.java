@@ -133,6 +133,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	}
 	
 	public static Plugin getPlugin() {
-		return Bukkit.getPluginManager().getPlugin("CLARA");
+		return Bukkit.getPluginManager().getPlugin("Clara");
 	}
 }
