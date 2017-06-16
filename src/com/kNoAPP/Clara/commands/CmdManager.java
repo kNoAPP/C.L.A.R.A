@@ -24,7 +24,7 @@ public class CmdManager implements CommandExecutor {
 				if(args.length == 1) {
 					if(args[0].equalsIgnoreCase("guitool")) {
 						if(p.hasPermission("clara.guitool")) {
-							Environment.openMainInventory(p);
+							Environment.openMainInventory(p, 1);
 							return true;
 						} else {
 							p.sendMessage(Message.MISSING.getMessage("clara.guitool"));

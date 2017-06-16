@@ -3,6 +3,7 @@ package com.kNoAPP.Clara.aspects;
 import java.io.File;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -30,8 +31,18 @@ public class Actions implements Listener {
 		ItemStack is = e.getCurrentItem();
 		
 		if(is != null) {
-			if(inv.getName().equals(Environment.getMainInventory().getName())) {
+			if(inv.getName().equals(Environment.getMainInventory(1).getName())) {
 				e.setCancelled(true);
+				if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.NEXT_ICON.setLores(null).getItem())) {
+					int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
+					Environment.openMainInventory(p, page);
+					return;
+				}
+				if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.PREVIOUS_ICON.setLores(null).getItem())) {
+					int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
+					Environment.openMainInventory(p, page);
+					return;
+				}
 				for(Environment env : Environment.environments) {
 					if(env.getItem().isSimilar(is)) {
 						env.openSubInventory(p);
@@ -50,7 +61,7 @@ public class Actions implements Listener {
 				if(inv.getName().equals(env.getSubInventory().getName())) {
 					e.setCancelled(true);
 					if(is.isSimilar(SpecialItem.BACK.getItem())) {
-						Environment.openMainInventory(p);
+						Environment.openMainInventory(p, 1);
 						return;
 					}
 					if(is.isSimilar(SpecialItem.SETTINGS.getItem())) {
@@ -81,7 +92,7 @@ public class Actions implements Listener {
 					}
 					if(is.isSimilar(SpecialItem.MANAGE_WORLDS.getItem())) {
 						if(Environment.getThisEnvironment() != env) {
-							env.openMWInventory(p);
+							env.openMWInventory(p, 1);
 						} else {
 							p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
 							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
@@ -90,7 +101,7 @@ public class Actions implements Listener {
 					}
 					if(is.isSimilar(SpecialItem.MANAGE_PLUGINS.getItem())) {
 						if(Environment.getThisEnvironment() != env) {
-							env.openMPInventory(p);
+							env.openMPInventory(p, 1);
 						} else {
 							p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
 							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
@@ -112,7 +123,7 @@ public class Actions implements Listener {
 						if(Environment.getThisEnvironment() != env) {
 							env.remove();
 							p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been removed."));
-							Environment.openMainInventory(p);
+							Environment.openMainInventory(p, 1);
 						} else {
 							p.sendMessage(Message.INFO.getMessage("Cannot remove a loaded setup!"));
 							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
@@ -161,49 +172,65 @@ public class Actions implements Listener {
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 					return;
 				}
-				if(inv.getName().equals(env.getMPInventory().getName())) {
+				if(inv.getName().equals(env.getMPInventory(1).getName())) {
 					e.setCancelled(true);
 					if(is.isSimilar(SpecialItem.BACK.getItem())) {
 						env.openSubInventory(p);
 						return;
 					}
-					for(File f : Environment.getAllFiles(false)) {
-						if(f.isFile()) {
-							if(is.isSimilar(env.getMPItem(f))) {
-								if(env.getPluginNames().contains(f.getName())) env.removePlugin(f);
-								else env.addPlugin(f);
-								env.openMPInventory(p);
-								return;
-							}
+					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.NEXT_ICON.setLores(null).getItem())) {
+						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
+						env.openMPInventory(p, page);
+						return;
+					}
+					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.PREVIOUS_ICON.setLores(null).getItem())) {
+						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
+						env.openMPInventory(p, page);
+						return;
+					}
+					for(File f : Environment.getAllFiles(false, false)) {
+						if(is.isSimilar(env.getMPItem(f))) {
+							if(env.getPluginNames().contains(f.getName())) env.removePlugin(f);
+							else env.addPlugin(f);
+							env.openMPInventory(p, 1);
+							return;
 						}
 					}
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 					return;
 				}
-				if(inv.getName().equals(env.getMWInventory().getName())) {
+				if(inv.getName().equals(env.getMWInventory(1).getName())) {
 					e.setCancelled(true);
 					if(is.isSimilar(SpecialItem.BACK.getItem())) {
 						env.openSubInventory(p);
 						return;
 					}
-					for(File f : Environment.getAllFiles(false)) {
-						if(f.isDirectory()) {
-							if(is.isSimilar(env.getMWItem(f))) {
-								for(EWorld ew : env.getWorlds()) {
-									if(ew.getName().equals(f.getName())) {
-										env.removeWorld(ew);
-										env.openMWInventory(p);
-										return;
-									}
+					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.NEXT_ICON.setLores(null).getItem())) {
+						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
+						env.openMWInventory(p, page);
+						return;
+					}
+					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.PREVIOUS_ICON.setLores(null).getItem())) {
+						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
+						env.openMWInventory(p, page);
+						return;
+					}
+					for(File f : Environment.getAllFiles(false, true)) {
+						if(is.isSimilar(env.getMWItem(f))) {
+							for(EWorld ew : env.getWorlds()) {
+								if(ew.getName().equals(f.getName())) {
+									env.removeWorld(ew);
+									env.openMWInventory(p, 1);
+									return;
 								}
-								Object[] transfer = new Object[]{env, new EWorld(f.getName(), null)};
-								Environment.settingWorld.put(p.getName(), transfer);
-								
-								p.closeInventory();
-								p.sendMessage(Message.INFO.getMessage("Please type this world's copy name."));
-								p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-								return;
 							}
+							Object[] transfer = new Object[]{env, new EWorld(f.getName(), null)};
+							Environment.settingWorld.put(p.getName(), transfer);
+							
+							p.closeInventory();
+							p.sendMessage(Message.INFO.getMessage("Please type this world's copy name."));
+							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+							return;
 						}
 					}
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
@@ -267,6 +294,7 @@ public class Actions implements Listener {
 		if(Environment.settingWorld.containsKey(p.getName())) {
 			e.setCancelled(true);
 			Object[] transfer = Environment.settingWorld.get(p.getName());
+			Environment.settingWorld.remove(p.getName());
 			Environment env = (Environment) transfer[0];
 			EWorld ew = (EWorld) transfer[1];
 			
@@ -275,7 +303,7 @@ public class Actions implements Listener {
 				ew.setCopiedName(m);
 				env.addWorld(ew);
 				p.sendMessage(Message.INFO.getMessage("Updated world copy name to " + m + "."));
-				env.openMWInventory(p);
+				env.openMWInventory(p, 1);
 			} else {
 				p.sendMessage(Message.INFO.getMessage("Copy name already in use! [" + preW.getName() + ", " + preW.getCopiedName() + "]"));
 			}

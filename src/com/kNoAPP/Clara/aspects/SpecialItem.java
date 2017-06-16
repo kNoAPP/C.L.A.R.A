@@ -1,7 +1,6 @@
 package com.kNoAPP.Clara.aspects;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -39,6 +38,11 @@ public enum SpecialItem {
 			new String[]{ChatColor.GRAY + "Change this setup's icon"}, null, null),
 	DELETE_ENVIRONMENT(ChatColor.DARK_RED + "Delete Setup", 1, (byte)0, Material.BARRIER,
 			new String[]{ChatColor.GRAY + "(A really long time...)"}, null, null),
+	NEXT_ICON(ChatColor.GREEN + "Next Page", 1, (byte)5, Material.CARPET,
+			null, null, null),
+	PREVIOUS_ICON(ChatColor.RED + "Previous Page", 1, (byte)14, Material.CARPET,
+			null, null, null),
+	
 	
 	FORCE_RESTART_FALSE(ChatColor.RED + "Restart Server", 1, (byte)0, Material.APPLE,
 			new String[]{ChatColor.GRAY + "Restart on load/unload"}, null, null),
@@ -142,13 +146,10 @@ public enum SpecialItem {
 		ItemMeta im = is.getItemMeta();
 		im.setDisplayName(name);
 		
-		if(lores != null) {
-			List<String> finalLore = new ArrayList<String>();
-			for(String l : lores) {
-				finalLore.add(l);
-			}
-			im.setLore(finalLore);
-		}
+		ArrayList<String> finalLore = new ArrayList<String>();
+		if(lores != null) for(String l : lores) finalLore.add(l);
+		im.setLore(finalLore);
+		
 		
 		if(enchants != null) {
 			for(Enchantment e : enchants) {
@@ -161,6 +162,16 @@ public enum SpecialItem {
 				im.addItemFlags(iF);
 			}
 		}
+		is.setItemMeta(im);
+		return is;
+	}
+	
+	/*
+	 * Remember to use a clone!
+	 */
+	public static ItemStack cleanLores(ItemStack is) {
+		ItemMeta im = is.getItemMeta();
+		im.setLore(new ArrayList<String>());
 		is.setItemMeta(im);
 		return is;
 	}

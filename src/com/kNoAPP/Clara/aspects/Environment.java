@@ -472,17 +472,20 @@ public class Environment {
 		p.openInventory(getSettingsInventory());
 	}
 	
-	public Inventory getMPInventory() {
+	public Inventory getMPInventory(int page) {
 		Inventory inv = Bukkit.createInventory(null, 54, name + " - Plugins");
-		int a = 0;
-		for(File f : getAllFiles(false)) {
-			if(f.isFile() && a < 45) {
-				inv.setItem(a, getMPItem(f));
-				a++;
-			}
+		List<File> files = getAllFiles(false, false);
+		inv.setItem(49, SpecialItem.BACK.getItem());
+		if(files.size() >= page*45) inv.setItem(53, SpecialItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
+		if(page > 1) inv.setItem(45, SpecialItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
+		
+		for(int i=0; i<45; i++) {
+			if(i+((page-1)*45) < files.size()) {
+				File f = files.get(i+((page-1)*45));
+				inv.setItem(i, getMPItem(f));
+			} else break;
 		}
 		
-		inv.setItem(49, SpecialItem.BACK.getItem());
 		return inv;
 	}
 	
@@ -503,22 +506,24 @@ public class Environment {
 		return is;
 	}
 	
-	public void openMPInventory(Player p) {
+	public void openMPInventory(Player p, int page) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-		p.openInventory(getMPInventory());
+		p.openInventory(getMPInventory(page));
 	}
 	
-	public Inventory getMWInventory() {
+	public Inventory getMWInventory(int page) {
 		Inventory inv = Bukkit.createInventory(null, 54, name + " - Worlds");
-		int a = 0;
-		for(File f : getAllFiles(false)) {
-			if(f.isDirectory() && a < 45) {
-				inv.setItem(a, getMWItem(f));
-				a++;
-			}
-		}
-		
+		List<File> files = getAllFiles(false, true);
 		inv.setItem(49, SpecialItem.BACK.getItem());
+		if(files.size() >= page*45) inv.setItem(53, SpecialItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
+		if(page > 1) inv.setItem(45, SpecialItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
+		
+		for(int i=0; i<45; i++) {
+			if(i+((page-1)*45) < files.size()) {
+				File f = files.get(i+((page-1)*45));
+				inv.setItem(i, getMWItem(f));
+			} else break;
+		}
 		return inv;
 	}
 	
@@ -542,9 +547,9 @@ public class Environment {
 		return is;
 	}
 	
-	public void openMWInventory(Player p) {
+	public void openMWInventory(Player p, int page) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-		p.openInventory(getMWInventory());
+		p.openInventory(getMWInventory(page));
 	}
 	
 	public Inventory getIconInventory() {
@@ -594,6 +599,21 @@ public class Environment {
 		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
 		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
 		return source.listFiles();
+	}
+	
+	/**
+	 * Gets all files in the local or database folder
+	 * @param local plugin(t) or database folder(f)
+	 * @param directory is directory?
+	 */
+	public static List<File> getAllFiles(boolean local, boolean directory) {
+		File source;
+		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
+		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		
+		List<File> files = new ArrayList<File>();
+		for(File f : source.listFiles()) if(f.isDirectory() == directory) files.add(f);
+		return files;
 	}
 	
 	public static void importEnvironments() {
@@ -658,28 +678,24 @@ public class Environment {
 		return getEnvironment(Data.ENVIRONMENT.getFileConfig().getInt("Active"));
 	}
 	
-	public static Inventory getMainInventory() {
+	public static Inventory getMainInventory(int page) {
 		Inventory inv = Bukkit.createInventory(null, 54, "Clara Setups");
 		inv.setItem(4, SpecialItem.CLARA_SETUPS.getItem());
+		if(environments.size() >= page*45) inv.setItem(8, SpecialItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
+		if(page > 1) inv.setItem(0, SpecialItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
 		
-		int a = 9;
-		for(Environment e : environments) {
-			if(a < 54) {
-				inv.setItem(a, e.getItem());
-				a++;
-			}
+		for(int i=0; i<45; i++) {
+			if(i+((page-1)*45) < environments.size()) {
+				Environment e = environments.get(i+((page-1)*45));
+				inv.setItem(i+9, e.getItem());
+			} else inv.setItem(i+9, SpecialItem.NEW_SETUP.getItem());
 		}
-		
-		while(a < 54) {
-			inv.setItem(a, SpecialItem.NEW_SETUP.getItem());
-			a++;
-		}
-		
+
 		return inv;
 	}
 	
-	public static void openMainInventory(Player p) {
+	public static void openMainInventory(Player p, int page) {
 		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-		p.openInventory(getMainInventory());
+		p.openInventory(getMainInventory(page));
 	}
 }
