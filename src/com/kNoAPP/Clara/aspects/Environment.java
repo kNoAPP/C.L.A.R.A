@@ -280,7 +280,7 @@ public class Environment {
 		}
 		
 		long delay = 0;
-		if(getWorlds(false).size() != 0) {
+		if(getWorlds(false).size() != 0 || forceRestart) {
 			delay = 20L;
 			Server transfer = Server.transferServer(Server.getThisServer());
 			for(Player pl : Bukkit.getOnlinePlayers()) {
@@ -324,7 +324,7 @@ public class Environment {
 				fc.set("Active", getID());
 				Data.ENVIRONMENT.saveDataFile(fc);
 				
-				if(getWorlds(false).size() == 0 && !forceRestart()) {
+				if(getWorlds(false).size() == 0 && !forceRestart) {
 					Bukkit.reload(); //Try this
 				} else {
 					Bukkit.shutdown();
