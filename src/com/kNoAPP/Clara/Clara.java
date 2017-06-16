@@ -51,13 +51,14 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	}
 	
 	private void register() {
-		if(!MySQL.loadConnection()) {
-			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] Please fix your database settings and try again!");
-			failed = true;
+		if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+			if(!MySQL.loadConnection()) {
+				Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] Please fix your database settings and try again!");
+				failed = true;
+			}
+			this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+			this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
 		}
-		
-		this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-		this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
 		
 		this.getServer().getPluginManager().registerEvents(new Actions(), this);
 		
@@ -91,10 +92,12 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	public static void importAspects() {
 		getPlugin().getLogger().info("Importing Aspects...");
 		
-		Server.importServers();
-		if(Server.getThisServer() == null && !failed) {
-			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] This server isn't in your Bungee Configuration!");
-			failed = true;
+		if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+			Server.importServers();
+			if(Server.getThisServer() == null && !failed) {
+				Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] This server isn't in your Bungee Configuration!");
+				failed = true;
+			}
 		}
 		
 		File db = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
@@ -104,9 +107,11 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		}
 		
 		if(!failed) {
-			Server.getThisServer().logToDB();
-			Server.checkSetup();
-			Server.getThisServer().setOnline(true);
+			if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+				Server.getThisServer().logToDB();
+				Server.checkSetup();
+				Server.getThisServer().setOnline(true);
+			}
 			
 			Environment.importEnvironments();
 			
@@ -123,12 +128,13 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	public static void exportAspects() {
 		getPlugin().getLogger().info("Exporting Aspects...");
 		if(!failed) {
-			Server.getThisServer().setOnline(false, true);
+			if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setOnline(false, true);
 			
 			Environment tenv = Environment.getThisEnvironment();
 			if(tenv != null) if(tenv.loadFreshWorld()) tenv.loadWorlds();
 			
 			Environment.exportEnvironments();
+			MySQL.killConnection();
 		}
 	}
 	

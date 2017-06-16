@@ -39,12 +39,13 @@ public class ImportExport implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("export")) {
 				if(p.hasPermission("clara.export")) {
 					if(args.length == 0) {
+						exportFiles(false);
 						p.sendMessage(ChatColor.GREEN + "Exported Settings!");
 						return true;
 					}
 					if(args.length == 1) {
 						if(args[0].equalsIgnoreCase("-a")) {
-							Clara.exportData();
+							exportFiles(true);
 							p.sendMessage(ChatColor.GREEN + "Exported temp .yml files and settings!");
 							return true;
 						}
@@ -62,12 +63,13 @@ public class ImportExport implements CommandExecutor {
 			if(cmd.getName().equalsIgnoreCase("import")) {
 				if(p.hasPermission("clara.import")) {
 					if(args.length == 0) {
+						importFiles(false);
 						p.sendMessage(ChatColor.GREEN + "Imported settings!");
 						return true;
 					}
 					if(args.length == 1) {
 						if(args[0].equalsIgnoreCase("-a")) {
-							Clara.importData();
+							importFiles(true);
 							p.sendMessage(ChatColor.GREEN + "Imported .yml files and settings!");
 							return true;
 						}
@@ -107,14 +109,18 @@ public class ImportExport implements CommandExecutor {
 	public static void importFiles(boolean all) {
 		if(all) {
 			Clara.importData();
+			Clara.importAspects();
 		} else {
+			Clara.importAspects();
 		}
 	}
 	
 	public static void exportFiles(boolean all) {
 		if(all) {
+			Clara.exportAspects();
 			Clara.exportData();
 		} else {
+			Clara.exportAspects();
 		}
 	}
 }

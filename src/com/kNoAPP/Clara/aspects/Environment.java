@@ -293,8 +293,8 @@ public class Environment {
 		}
 		
 		long delay = 0;
-		if(getWorlds(false).size() != 0 || forceRestart) {
-			delay = 20L;
+		if((getWorlds(false).size() != 0 || forceRestart) && Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+			delay = 40L;
 			Server transfer = Server.transferServer(Server.getThisServer());
 			for(Player pl : Bukkit.getOnlinePlayers()) {
 				if(transfer != null) {
@@ -343,15 +343,15 @@ public class Environment {
 					Bukkit.shutdown();
 				}
 			}
-		}.runTaskLater(Clara.getPlugin(), 2*delay);
+		}.runTaskLater(Clara.getPlugin(), delay);
 	}
 	
 	public void unload() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Unloading Environment [" + getName() + "]");
 		
 		long delay = 0;
-		if(getWorlds(false).size() != 0 || forceRestart) {
-			delay = 20L;
+		if((getWorlds(false).size() != 0 || forceRestart) && Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+			delay = 40L;
 			Server transfer = Server.transferServer(Server.getThisServer());
 			for(Player pl : Bukkit.getOnlinePlayers()) {
 				if(transfer != null) {
@@ -379,7 +379,7 @@ public class Environment {
 					Bukkit.shutdown();
 				}
 			}
-		}.runTaskLater(Clara.getPlugin(), 2*delay);
+		}.runTaskLater(Clara.getPlugin(), delay);
 	}
 	
 	public void loadPlugins() {
