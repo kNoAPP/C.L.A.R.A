@@ -41,6 +41,7 @@ public class Environment {
 	
 	private boolean forceRestart;
 	private boolean loadFreshWorld;
+	private boolean saveWorld;
 	
 	public Environment(String name, int id) {
 		this.name = name;
@@ -52,6 +53,7 @@ public class Environment {
 		
 		forceRestart = false;
 		loadFreshWorld = false;
+		saveWorld = false;
 	}
 	
 	public Environment(String name, int id, Material icon) {
@@ -64,9 +66,11 @@ public class Environment {
 		
 		forceRestart = false;
 		loadFreshWorld = false;
+		saveWorld = false;
 	}
 	
-	public Environment(String name, int id, Material icon, List<String> pluginNames, List<EWorld> worlds, boolean forceRestart, boolean loadFreshWorld) {
+	public Environment(String name, int id, Material icon, List<String> pluginNames, List<EWorld> worlds, 
+			boolean forceRestart, boolean loadFreshWorld, boolean saveWorld) {
 		this.name = name;
 		this.id = id;
 		this.icon = icon;
@@ -76,6 +80,7 @@ public class Environment {
 		
 		this.forceRestart = forceRestart;
 		this.loadFreshWorld = loadFreshWorld;
+		this.saveWorld = saveWorld;
 	}
 	
 	public String getName() {
@@ -104,6 +109,14 @@ public class Environment {
 	
 	public void setLoadFreshWorld(boolean loadFreshWorld) {
 		this.loadFreshWorld = loadFreshWorld;
+	}
+	
+	public boolean saveWorld() {
+		return saveWorld;
+	}
+	
+	public void setSaveWorld(boolean saveWorld) {
+		this.saveWorld = saveWorld;
 	}
 	
 	public Material getIcon() {
@@ -404,6 +417,17 @@ public class Environment {
 	
 	public void unloadWorlds() {
 		for(File f : getWorlds(true)) {
+			if(saveWorld) {
+				EWorld ew = getEWorld(f.getName(), true);
+				File d = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"), ew.getName());
+				
+				try{FileUtils.deleteDirectory(d);}
+				catch(Exception ex) {Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Failed to delete a world from the Database!");}
+				
+				try{FileUtils.copyDirectory(f, d);}
+				catch(Exception ex) {Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Failed to save a world to the Database!");}
+			}
+			
 			try{FileUtils.deleteDirectory(f);}
 			catch(Exception ex) {ex.printStackTrace();}
 		}
@@ -585,8 +609,10 @@ public class Environment {
 				
 				boolean forceRestart = fc.getBoolean("Environment." + name + ".settings.FR");
 				boolean loadFreshWorld = fc.getBoolean("Environment." + name + ".settings.LFW");
+				boolean saveWorld = fc.getBoolean("Environment." + name + ".settings.SW");
+				
 				new Environment(name, id, icon, pluginNames, worlds, 
-						forceRestart, loadFreshWorld).add();
+						forceRestart, loadFreshWorld, saveWorld).add();
 			}
 		}
 	}
@@ -602,6 +628,7 @@ public class Environment {
 			
 			fc.set("Environment." + e.getName() + ".settings.FR", e.forceRestart());
 			fc.set("Environment." + e.getName() + ".settings.LFW", e.loadFreshWorld());
+			fc.set("Environment." + e.getName() + ".settings.SW", e.saveWorld());
 		}
 		Data.ENVIRONMENT.saveDataFile(fc);
 	}
