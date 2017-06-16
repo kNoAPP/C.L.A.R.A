@@ -418,6 +418,7 @@ public class Environment {
 	public void unloadWorlds() {
 		for(File f : getWorlds(true)) {
 			if(saveWorld) {
+				Bukkit.getWorld(f.getName()).save();
 				EWorld ew = getEWorld(f.getName(), true);
 				File d = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"), ew.getName());
 				
@@ -458,8 +459,10 @@ public class Environment {
 		Inventory inv = Bukkit.createInventory(null, 9, name + " - Settings");
 		if(forceRestart) inv.setItem(0, SpecialItem.FORCE_RESTART_TRUE.getItem());
 		else inv.setItem(0, SpecialItem.FORCE_RESTART_FALSE.getItem());
-		if(loadFreshWorld) inv.setItem(1, SpecialItem.LOAD_WORLD_TRUE.getItem());
-		else inv.setItem(1, SpecialItem.LOAD_WORLD_FALSE.getItem());
+		if(saveWorld) inv.setItem(1, SpecialItem.SAVE_WORLD_TRUE.getItem());
+		else inv.setItem(1, SpecialItem.SAVE_WORLD_FALSE.getItem());
+		if(loadFreshWorld) inv.setItem(2, SpecialItem.LOAD_WORLD_TRUE.getItem());
+		else inv.setItem(2, SpecialItem.LOAD_WORLD_FALSE.getItem());
 		inv.setItem(8, SpecialItem.BACK.getItem());
 		return inv;
 	}

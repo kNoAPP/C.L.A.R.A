@@ -54,7 +54,12 @@ public class Actions implements Listener {
 						return;
 					}
 					if(is.isSimilar(SpecialItem.SETTINGS.getItem())) {
-						env.openSettingsInventory(p);
+						if(Environment.getThisEnvironment() != env) {
+							env.openSettingsInventory(p);
+						} else {
+							p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
+							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+						}
 						return;
 					}
 					if(is.isSimilar(SpecialItem.START_SERVER.getItem())) {
@@ -123,16 +128,6 @@ public class Actions implements Listener {
 						env.openSubInventory(p);
 						return;
 					}
-					if(is.isSimilar(SpecialItem.LOAD_WORLD_FALSE.getItem())) {
-						env.setLoadFreshWorld(true);
-						env.openSettingsInventory(p);
-						return;
-					}
-					if(is.isSimilar(SpecialItem.LOAD_WORLD_TRUE.getItem())) {
-						env.setLoadFreshWorld(false);
-						env.openSettingsInventory(p);
-						return;
-					}
 					if(is.isSimilar(SpecialItem.FORCE_RESTART_FALSE.getItem())) {
 						env.setForceRestart(true);
 						env.openSettingsInventory(p);
@@ -140,6 +135,26 @@ public class Actions implements Listener {
 					}
 					if(is.isSimilar(SpecialItem.FORCE_RESTART_TRUE.getItem())) {
 						env.setForceRestart(false);
+						env.openSettingsInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.SAVE_WORLD_FALSE.getItem())) {
+						env.setSaveWorld(true);
+						env.openSettingsInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.SAVE_WORLD_TRUE.getItem())) {
+						env.setSaveWorld(false);
+						env.openSettingsInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.LOAD_WORLD_FALSE.getItem())) {
+						env.setLoadFreshWorld(true);
+						env.openSettingsInventory(p);
+						return;
+					}
+					if(is.isSimilar(SpecialItem.LOAD_WORLD_TRUE.getItem())) {
+						env.setLoadFreshWorld(false);
 						env.openSettingsInventory(p);
 						return;
 					}
