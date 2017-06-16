@@ -283,7 +283,15 @@ public class Environment {
 		environments.remove(this);
 	}
 	
-	public void load() {		
+	public void load() {
+		if(getThisEnvironment() != null) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[" + Clara.getPlugin().getName() + "] Environment [" + getName() + "] has been queued for loading!");
+			FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+			fc.set("Queued", getID());
+			getThisEnvironment().unload();
+			return;
+		}
+		
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Loading Environment [" + getName() + "]");
 		if(isMissingPlugins(false)) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] This setup is missing plugins!");
@@ -335,6 +343,7 @@ public class Environment {
 				
 				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 				fc.set("Active", getID());
+				if(fc.getInt("Queued") == getID()) fc.set("Queued", 0); //Removes Queue
 				Data.ENVIRONMENT.saveDataFile(fc);
 				
 				if(getWorlds(false).size() == 0 && !forceRestart) {
@@ -443,7 +452,7 @@ public class Environment {
 		inv.setItem(25, SpecialItem.MANAGE_WORLDS.getItem());
 		if(getThisEnvironment() == null) inv.setItem(19, SpecialItem.START_SERVER.getItem());
 		else if(getThisEnvironment() == this) inv.setItem(19, SpecialItem.STOP_SERVER.getItem());
-		else inv.setItem(19, SpecialItem.LOADED_SERVER.getItem());
+		else inv.setItem(19, SpecialItem.QUEUE_SERVER.getItem());
 		inv.setItem(37, SpecialItem.CHANGE_NAME.getItem());
 		inv.setItem(40, SpecialItem.CHANGE_ICON.getItem());
 		inv.setItem(43, SpecialItem.DELETE_ENVIRONMENT.getItem());
@@ -676,6 +685,10 @@ public class Environment {
 	
 	public static Environment getThisEnvironment() {
 		return getEnvironment(Data.ENVIRONMENT.getFileConfig().getInt("Active"));
+	}
+	
+	public static Environment getQueuedEnvironment() {
+		return getEnvironment(Data.ENVIRONMENT.getFileConfig().getInt("Queued"));
 	}
 	
 	public static Inventory getMainInventory(int page) {

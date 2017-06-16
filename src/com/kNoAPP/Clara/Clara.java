@@ -114,7 +114,7 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			}
 			
 			Environment.importEnvironments();
-			
+			if(Environment.getQueuedEnvironment() != null) Environment.getQueuedEnvironment().load();
 			/*
 			if(Environment.getThisEnvironment() != null) {
 				Environment.getThisEnvironment().load();

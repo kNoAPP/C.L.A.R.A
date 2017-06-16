@@ -95,6 +95,7 @@ public enum Data {
 				fc.set("Version", "1.0.0");
 				fc.set("Database", "/example/path/");
 				fc.set("Active", 0);
+				fc.set("Queued", 0);
 			}
 			saveDataFile(fc);
 			logDataFile();

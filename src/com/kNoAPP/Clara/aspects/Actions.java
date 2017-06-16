@@ -13,6 +13,8 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
+import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -82,11 +84,18 @@ public class Actions implements Listener {
 						env.load();
 						return;
 					}
+					if(is.isSimilar(SpecialItem.QUEUE_SERVER.getItem())) {
+						p.closeInventory();
+						p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been queued."));
+						p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+						env.load();
+						return;
+					}
 					if(is.isSimilar(SpecialItem.STOP_SERVER.getItem())) {
 						p.closeInventory();
 						Environment tenv = Environment.getThisEnvironment();
 						if(tenv != null) { //Not Needed. There just in case.
-							p.sendMessage(Message.INFO.getMessage("Environment " + tenv.getName() + " is being deconstructed..."));
+							p.sendMessage(Message.INFO.getMessage("Environment " + tenv.getName() + " is being deconstructed."));
 							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 							tenv.unload();
 						}
@@ -311,6 +320,11 @@ public class Actions implements Listener {
 			}
 			return;
 		}
+	}
+	
+	@EventHandler
+	public void onLogin(PlayerLoginEvent e) {
+		if(Environment.getQueuedEnvironment() != null) e.disallow(Result.KICK_OTHER, ChatColor.RED + "This server is still changing setups...");
 	}
 	
 	@EventHandler
