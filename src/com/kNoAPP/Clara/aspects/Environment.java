@@ -373,15 +373,15 @@ public class Environment {
 			}
 		}
 		
+		unloadPlugins();
+		unloadWorlds();
+		
+		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+		fc.set("Active", 0);
+		Data.ENVIRONMENT.saveDataFile(fc);
+		
 		new BukkitRunnable() {
 			public void run() {
-				unloadPlugins();
-				unloadWorlds();
-				
-				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
-				fc.set("Active", 0);
-				Data.ENVIRONMENT.saveDataFile(fc);
-				
 				if(getWorlds(false).size() == 0 && !forceRestart) {
 					Bukkit.reload(); //Try this
 				} else {
