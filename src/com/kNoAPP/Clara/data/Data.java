@@ -10,17 +10,17 @@ import com.kNoAPP.Clara.Clara;
 
 public enum Data {
 	
-	CONFIG(new File(Clara.getPlugin().getDataFolder(), "config.yml"), new YamlConfiguration(), "config.yml"),
-	MAIN(null, new YamlConfiguration(), "main.yml"),
-	ENVIRONMENT(null, new YamlConfiguration(), "environment.yml");
+	CONFIG(new File(Clara.getPlugin().getDataFolder(), "config.yml"), "config.yml"),
+	MAIN(null, "main.yml"),
+	ENVIRONMENT(null, "environment.yml");
 	
 	private File file;
 	private FileConfiguration fc;
 	private String fileName;
 	
-	private Data(File file, FileConfiguration fc, String fileName) {
+	private Data(File file, String fileName) {
 		this.file = file;
-		this.fc = fc;
+		this.fc = new YamlConfiguration();
 		this.fileName = fileName;
 	}
 	
@@ -30,9 +30,9 @@ public enum Data {
 	
 	public void setFile(String path) {
 		if(path == "") {
-			file = new File(Clara.getPlugin().getDataFolder(), getFileName());
+			this.file = new File(Clara.getPlugin().getDataFolder(), this.getFileName());
 		} else {
-			file = new File(path, getFileName());
+			this.file = new File(path, this.getFileName());
 		}
 	}
 	
@@ -46,18 +46,8 @@ public enum Data {
 	
 	public void logDataFile() {
 		try {
-			fc.save(getFile());
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-	
-	public void loadDataFile() {
-		try {
-			fc.load(getFile());
-		} catch (Exception e) {
-			 e.printStackTrace();
-		}
+			this.fc.save(this.getFile());
+		} catch (IOException e) {}
 	}
 	
 	public String getFileName() {
@@ -65,16 +55,15 @@ public enum Data {
 	}
 	
 	public String getPath() {
-		return getFile().getAbsolutePath();
+		return this.getFile().getAbsolutePath();
 	}
 	
 	public void createDataFile() {
-		if(!getFile().exists()) {
-			Clara.getPlugin().getLogger().info(getFileName() + " not found. Creating...");
+		if(!this.getFile().exists()) {
+			Clara.getPlugin().getLogger().info(this.getFileName() + " not found. Creating...");
 			try {
-				getFile().createNewFile();
+				this.getFile().createNewFile();
 			} catch (Exception e) {}
-			
 			FileConfiguration fc = this.fc;
 			if(this == CONFIG) {
 				fc.set("Version", "1.0.0");
@@ -97,10 +86,12 @@ public enum Data {
 				fc.set("Active", 0);
 				fc.set("Queued", 0);
 			}
-			saveDataFile(fc);
-			logDataFile();
+			this.saveDataFile(fc);
+			this.logDataFile();
         }
-		
-		loadDataFile();
+	
+		try {
+			this.fc.load(this.getFile());
+		} catch (Exception e) {}
 	}
 }
