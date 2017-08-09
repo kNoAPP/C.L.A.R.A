@@ -261,7 +261,6 @@ public class Tools {
 	}
 
 	public static String getVersion() {
-		net.minecraft.server.v1_8_R3
 		return Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
 	}
 }
