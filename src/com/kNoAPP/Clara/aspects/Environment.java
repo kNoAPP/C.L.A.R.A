@@ -460,7 +460,7 @@ public class Environment {
 	}
 	
 	public void openSubInventory(Player p) {
-		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.playSound(p.getLocation(), Sound.WOOD_CLICK, 1F, 1F);
 		p.openInventory(getSubInventory());
 	}
 	
@@ -477,7 +477,7 @@ public class Environment {
 	}
 	
 	public void openSettingsInventory(Player p) {
-		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.playSound(p.getLocation(), Sound.WOOD_CLICK, 1F, 1F);
 		p.openInventory(getSettingsInventory());
 	}
 	
@@ -516,7 +516,7 @@ public class Environment {
 	}
 	
 	public void openMPInventory(Player p, int page) {
-		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.playSound(p.getLocation(), Sound.WOOD_CLICK, 1F, 1F);
 		p.openInventory(getMPInventory(page));
 	}
 	
@@ -557,7 +557,7 @@ public class Environment {
 	}
 	
 	public void openMWInventory(Player p, int page) {
-		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.playSound(p.getLocation(), Sound.WOOD_CLICK, 1F, 1F);
 		p.openInventory(getMWInventory(page));
 	}
 	
@@ -573,7 +573,7 @@ public class Environment {
 	
 	public void openIconInventory(Player p) {
 		p.sendMessage(Message.INFO.getMessage("Place your icon in the inventory!"));
-		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.playSound(p.getLocation(), Sound.WOOD_CLICK, 1F, 1F);
 		p.openInventory(getIconInventory());
 	}
 	
@@ -708,7 +708,7 @@ public class Environment {
 	}
 	
 	public static void openMainInventory(Player p, int page) {
-		p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+		p.playSound(p.getLocation(), Sound.WOOD_CLICK, 1F, 1F);
 		p.openInventory(getMainInventory(page));
 	}
 }
