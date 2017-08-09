@@ -105,7 +105,7 @@ public class Server {
 			//Servers
 			for(String s : fc.getConfigurationSection("servers").getKeys(false)) {
 				try {
-					int port = Integer.parseInt(fc.getString("servers." + s + ".address").replaceFirst("localhost:", ""));
+					int port = Integer.parseInt(fc.getString("servers." + s + ".address").split(":")[1]);
 					servers.add(new Server(s, port));
 				} catch(Exception e) {
 					e.printStackTrace();
