@@ -82,7 +82,9 @@ public enum Data {
 			}
 			if(this == ENVIRONMENT) {
 				fc.set("Version", "1.0.0");
-				fc.set("Database", "/example/path/");
+				File f = new File(Clara.getPlugin().getDataFolder().getAbsolutePath() + "/Database");
+				f.mkdirs();
+				fc.set("Database", f.getAbsolutePath());
 				fc.set("Active", 0);
 				fc.set("Queued", 0);
 			}
