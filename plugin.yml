@@ -1,9 +1,9 @@
 name: Clara
 main: com.kNoAPP.Clara.Clara
-version: 1.0.3
+version: 1.0.5
 commands:
     clara:
-        description: CLARA Manager
+        description: Clara Manager
     import:
         description: Import Files
     export:
