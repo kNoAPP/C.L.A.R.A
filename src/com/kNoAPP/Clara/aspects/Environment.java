@@ -509,7 +509,8 @@ public class Environment {
 			im.addItemFlags(ItemFlag.HIDE_ENCHANTS);
 			lores.add(ChatColor.GREEN + "Selected!");
 		}
-		lores.add(ChatColor.GRAY + f.getParentFile().getPath());
+		
+		for(String folder : f.getParentFile().getPath().split("/")) lores.add(ChatColor.GRAY + folder);
 		im.setLore(lores);
 		is.setItemMeta(im);
 		return is;
@@ -550,7 +551,8 @@ public class Environment {
 				lores.add(ChatColor.GOLD + ew.getCopiedName());
 			}
 		}
-		lores.add(ChatColor.GRAY + f.getParentFile().getPath());
+
+		for(String folder : f.getParentFile().getPath().split("/")) lores.add(ChatColor.GRAY + folder);
 		im.setLore(lores);
 		is.setItemMeta(im);
 		return is;
