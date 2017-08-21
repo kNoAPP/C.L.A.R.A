@@ -13,7 +13,6 @@ import com.kNoAPP.Clara.aspects.Actions;
 import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Server;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
-import com.kNoAPP.Clara.commands.ImportExport;
 import com.kNoAPP.Clara.commands.CmdManager;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.data.MySQL;
@@ -63,9 +62,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		this.getServer().getPluginManager().registerEvents(new Actions(), this);
 		
 		this.getCommand("clara").setExecutor(new CmdManager());
-		
-		this.getCommand("import").setExecutor(new ImportExport());
-		this.getCommand("export").setExecutor(new ImportExport());
 	}
 	
 	public static void importData() {
