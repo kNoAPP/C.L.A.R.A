@@ -171,8 +171,10 @@ public enum SpecialItem {
 	 */
 	public static ItemStack cleanLores(ItemStack is) {
 		ItemMeta im = is.getItemMeta();
-		im.setLore(new ArrayList<String>());
-		is.setItemMeta(im);
+		if(im != null) {
+			im.setLore(new ArrayList<String>());
+			is.setItemMeta(im);
+		}
 		return is;
 	}
 }
