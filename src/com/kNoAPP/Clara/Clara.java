@@ -17,6 +17,7 @@ import com.kNoAPP.Clara.commands.CmdManager;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.data.MySQL;
 
+//Copyright Alden "kNoAPP" Bansemer 2017
 public class Clara extends JavaPlugin implements PluginMessageListener {
 
 	public static boolean failed = false;
