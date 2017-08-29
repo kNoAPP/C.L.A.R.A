@@ -8,12 +8,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.aspects.Actions;
 import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Server;
-import com.kNoAPP.Clara.aspects.ServerConnection;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.commands.CmdManager;
 import com.kNoAPP.Clara.data.Data;
@@ -32,7 +30,7 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		importAspects();
 		long tEnd = System.currentTimeMillis();
 		getPlugin().getLogger().info("Successfully Enabled! (" + (tEnd - tStart) + " ms)");
-		Bukkit.getConsoleSender().sendMessage("AThird has cracked the code for BlackSpigot!");
+		Bukkit.getConsoleSender().sendMessage(ChatColor.DARK_RED + "AThird has cracked the code for BlackSpigot!");
 		
 		if(failed) {
 			getPlugin().getPluginLoader().disablePlugin(this);
@@ -123,12 +121,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 				Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + getPlugin().getName() + "] Could not find environment to load!");
 			}
 			*/
-			
-			new BukkitRunnable() {
-				public void run() {
-					ServerConnection.check();
-				}
-			}.runTaskTimer(getPlugin(), 0L, 1200L);
 		}
 	}
 	
@@ -142,7 +134,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			
 			Environment.exportEnvironments();
 			MySQL.killConnection();
-			ServerConnection.sc.stop();
 		}
 	}
 	
