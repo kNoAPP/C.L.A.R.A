@@ -6,6 +6,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
+import com.kNoAPP.Clara.Clara;
 import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Message;
 
@@ -30,6 +31,15 @@ public class CmdManager implements CommandExecutor {
 							p.sendMessage(Message.MISSING.getMessage("clara.guitool"));
 							return false;
 						}
+					}
+				}
+			}
+			if(cmd.getName().equalsIgnoreCase("disable")) {
+				if(args.length == 0) {
+					if(p.hasPermission("clara.disable")) {
+						p.sendMessage(ChatColor.GREEN + "Clara is being disabled...");
+						p.sendMessage(ChatColor.GRAY + "You may now safely edit configuration files.");
+						Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
 					}
 				}
 			}

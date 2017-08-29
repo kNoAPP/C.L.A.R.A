@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Color;
 import org.bukkit.FireworkEffect;
@@ -262,5 +263,14 @@ public class Tools {
 
 	public static String getVersion() {
 		return Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3];
+	}
+	
+	public static void deleteDir(File folder) {
+		try {
+			FileUtils.deleteDirectory(folder);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
