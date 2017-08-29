@@ -32,6 +32,7 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		importAspects();
 		long tEnd = System.currentTimeMillis();
 		getPlugin().getLogger().info("Successfully Enabled! (" + (tEnd - tStart) + " ms)");
+		Bukkit.getConsoleSender().sendMessage("AThird has cracked the code for BlackSpigot!");
 		
 		if(failed) {
 			getPlugin().getPluginLoader().disablePlugin(this);
