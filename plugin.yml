@@ -1,6 +1,6 @@
 name: Clara
 main: com.kNoAPP.Clara.Clara
-version: 1.1.0
+version: 1.1.1
 commands:
     clara:
         description: Clara Manager
