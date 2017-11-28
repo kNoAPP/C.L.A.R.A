@@ -9,6 +9,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 
+import com.kNoAPP.Clara.aspects.EWorld;
 import com.kNoAPP.Clara.aspects.Actions;
 import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Server;
@@ -112,7 +113,9 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			}
 			
 			Environment.importEnvironments();
+			Environment tenv = Environment.getThisEnvironment();
 			if(Environment.getQueuedEnvironment() != null) Environment.getQueuedEnvironment().load();
+			if(tenv != null) for(EWorld ew : tenv.getWorlds()) if(Bukkit.getWorld(ew.getCopiedName()) != null) Bukkit.getWorld(ew.getCopiedName()).setAutoSave(false);
 			/*
 			if(Environment.getThisEnvironment() != null) {
 				Environment.getThisEnvironment().load();

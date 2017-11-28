@@ -29,11 +29,8 @@ public enum Data {
 	}
 	
 	public void setFile(String path) {
-		if(path == "") {
-			this.file = new File(Clara.getPlugin().getDataFolder(), this.getFileName());
-		} else {
-			this.file = new File(path, this.getFileName());
-		}
+		if(path == "") this.file = new File(Clara.getPlugin().getDataFolder(), this.getFileName());
+		else this.file = new File(path, this.getFileName());
 	}
 	
 	public FileConfiguration getFileConfig() {

@@ -53,11 +53,10 @@ public class Server {
 	public void logToDB() {
 		if(MySQL.getString(Table.SERVER.getName(), "name", "name", name) == null) {
 			//Add Server
-			Server s = this;
 			new BukkitRunnable() {
 				public void run() {
 					try {
-						PreparedStatement ps = MySQL.getConnection().prepareStatement("INSERT INTO `" + Table.SERVER.getName() + "` values('" + s.getName() + "', " + s.getPort() + ", 1);");
+						PreparedStatement ps = MySQL.getConnection().prepareStatement("INSERT INTO `" + Table.SERVER.getName() + "` values('" + Server.this.getName() + "', " + Server.this.getPort() + ", 1);");
 						ps.execute();
 						ps.close();
 					} catch(Exception e) {
