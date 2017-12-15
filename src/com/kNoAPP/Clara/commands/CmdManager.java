@@ -1,6 +1,8 @@
 package com.kNoAPP.Clara.commands;
 
+import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -40,6 +42,14 @@ public class CmdManager implements CommandExecutor {
 						p.sendMessage(ChatColor.GREEN + "Clara is being disabled...");
 						p.sendMessage(ChatColor.GRAY + "You may now safely edit configuration files.");
 						Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
+					}
+				}
+			}
+			if(cmd.getName().equalsIgnoreCase("world")) {
+				if(args.length == 1) {
+					if(p.hasPermission("clara.world")) {
+						World w = Bukkit.getWorld(args[0]);
+						if(w != null) p.teleport(w.getSpawnLocation());
 					}
 				}
 			}

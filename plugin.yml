@@ -1,8 +1,10 @@
 name: Clara
 main: com.kNoAPP.Clara.Clara
-version: 1.1.2
+version: 1.1.5
 commands:
     clara:
         description: Clara Manager
     disable:
         description: Disable Clara
+    world:
+        description: Access a World
