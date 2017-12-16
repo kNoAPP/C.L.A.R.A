@@ -8,9 +8,12 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Chunk;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
@@ -96,6 +99,14 @@ public class Environment {
 	}
 	
 	public boolean forceRestart() {
+		for(EWorld ew : worlds) if(ew.getCopiedName().equalsIgnoreCase("world") || ew.getCopiedName().equalsIgnoreCase("world_nether") || ew.getCopiedName().equalsIgnoreCase("world_the_end") 
+				|| Data.ENVIRONMENT.getFileConfig().getStringList("UsedWorlds").contains(ew.getCopiedName())) return true;
+		return forceRestart;
+	}
+	
+	public boolean forceRestart(boolean addCheck) {
+		for(EWorld ew : worlds) if(ew.getCopiedName().equalsIgnoreCase("world") || ew.getCopiedName().equalsIgnoreCase("world_nether") || ew.getCopiedName().equalsIgnoreCase("world_the_end") 
+				|| (Data.ENVIRONMENT.getFileConfig().getStringList("UsedWorlds").contains(ew.getCopiedName()) && addCheck)) return true;
 		return forceRestart;
 	}
 	
@@ -300,14 +311,13 @@ public class Environment {
 			}
 		}
 		
-		long delay = 0;
-		if((getWorlds(false).size() != 0 || forceRestart) && Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
-			delay = 40L;
+		if(forceRestart()) {
 			Server transfer = Server.transferServer(Server.getThisServer());
 			for(Player pl : Bukkit.getOnlinePlayers()) {
 				if(transfer != null) {
 					pl.sendMessage(Message.WARN.getMessage("This server is changing setups!"));
 					pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+					BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
 					BungeeAPI.connect(pl, transfer.getName());
 				} else {
 					pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!"));
@@ -336,36 +346,35 @@ public class Environment {
 		}.runTaskLater(Clara.getPlugin(), delay);
 		*/
 		
+		loadPlugins();
+		loadWorlds();
+		
+		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+		fc.set("Active", getID());
+		if(fc.getInt("Queued") == getID()) fc.set("Queued", 0); //Removes Queue
+		Data.ENVIRONMENT.saveDataFile(fc);
+		
 		new BukkitRunnable() {
 			public void run() {
-				loadPlugins();
-				loadWorlds();
-				
-				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
-				fc.set("Active", getID());
-				if(fc.getInt("Queued") == getID()) fc.set("Queued", 0); //Removes Queue
-				Data.ENVIRONMENT.saveDataFile(fc);
-				
-				if(getWorlds(false).size() == 0 && !forceRestart) {
+				if(forceRestart()) Bukkit.shutdown();
+				else {
+					Clara.reload = true;
 					Bukkit.reload(); //Try this
-				} else {
-					Bukkit.shutdown();
 				}
 			}
-		}.runTaskLater(Clara.getPlugin(), delay);
+		}.runTaskLater(Clara.getPlugin(), 40L);
 	}
 	
 	public void unload() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Unloading Environment [" + getName() + "]");
 		
-		long delay = 0;
-		if((getWorlds(false).size() != 0 || forceRestart) && Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
-			delay = 40L;
+		if(forceRestart()) {
 			Server transfer = Server.transferServer(Server.getThisServer());
 			for(Player pl : Bukkit.getOnlinePlayers()) {
 				if(transfer != null) {
 					pl.sendMessage(Message.WARN.getMessage("This server is changing setups!"));
 					pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+					BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
 					BungeeAPI.connect(pl, transfer.getName());
 				} else {
 					pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!"));
@@ -382,13 +391,13 @@ public class Environment {
 		
 		new BukkitRunnable() {
 			public void run() {
-				if(getWorlds(false).size() == 0 && !forceRestart) {
+				if(forceRestart(false)) Bukkit.shutdown();
+				else {
+					Clara.reload = true;
 					Bukkit.reload(); //Try this
-				} else {
-					Bukkit.shutdown();
 				}
 			}
-		}.runTaskLater(Clara.getPlugin(), delay);
+		}.runTaskLater(Clara.getPlugin(), 40L);
 	}
 	
 	public void loadPlugins() {
@@ -413,21 +422,25 @@ public class Environment {
 			if(d.exists()) {
 				World w = Bukkit.getWorld(d.getName());
 				if(w != null) {
-					w.setAutoSave(false);
-					Bukkit.getServer().unloadWorld(w.getName(), true);
+					for(Player pl : w.getPlayers()) pl.teleport(Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback")).getSpawnLocation());
+					for(Chunk c : w.getLoadedChunks()) c.unload();
+					Bukkit.unloadWorld(w.getName(), false);
 					try {FileUtils.deleteDirectory(d);}
 					catch(Exception ex) {ex.printStackTrace();}
 				}
 			}
 			try {FileUtils.copyDirectory(f, d);}
 			catch(Exception ex) {ex.printStackTrace();}
+			World n = Bukkit.createWorld(new WorldCreator(ew.getCopiedName()));
+			n.setAutoSave(false);
 		}
 	}
 	
 	public void unloadWorlds() {
 		for(File f : getWorlds(true)) {
+			World w = Bukkit.getWorld(f.getName());
 			if(saveWorld) {
-				Bukkit.getWorld(f.getName()).save();
+				w.save();
 				EWorld ew = getEWorld(f.getName(), true);
 				File d = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"), ew.getName());
 				
@@ -438,9 +451,29 @@ public class Environment {
 				catch(Exception ex) {Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Failed to save a world to the Database!");}
 			}
 			
-			try{FileUtils.deleteDirectory(f);}
-			catch(Exception ex) {ex.printStackTrace();}
+			Location fallback = Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback")).getSpawnLocation();
+			if(w != null) for(Player pl : w.getPlayers()) if(pl != null && fallback != null) pl.teleport(fallback);
+			for(Chunk c : w.getLoadedChunks()) c.unload();
+			
+			Bukkit.unloadWorld(w.getName(), false);
+
+			FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+			List<String> used = fc.getStringList("UsedWorlds");
+			used.add(w.getName());
+			fc.set("UsedWorlds", used);
+			Data.ENVIRONMENT.saveDataFile(fc);
+			
+			new BukkitRunnable() {
+				public void run() {
+					try{FileUtils.deleteDirectory(f);}
+					catch(Exception ex) {ex.printStackTrace();}
+				}
+			}.runTaskLater(Clara.getPlugin(), 20L);
 		}
+
+		try {Class.forName("net.minecraft.server." + Tools.getVersion() + ".RegionFileCache").getMethod("a").invoke(null);}
+		catch (Exception ex) {ex.printStackTrace();}
+		System.gc();
 	}
 	
 	public Inventory getSubInventory() {
@@ -450,9 +483,13 @@ public class Environment {
 		inv.setItem(4, getItem());
 		inv.setItem(22, SpecialItem.MANAGE_PLUGINS.getItem());
 		inv.setItem(25, SpecialItem.MANAGE_WORLDS.getItem());
-		if(getThisEnvironment() == null) inv.setItem(19, SpecialItem.START_SERVER.getItem());
-		else if(getThisEnvironment() == this) inv.setItem(19, SpecialItem.STOP_SERVER.getItem());
-		else inv.setItem(19, SpecialItem.QUEUE_SERVER.getItem());
+		if(getThisEnvironment() == null) {
+			inv.setItem(19, forceRestart() ? SpecialItem.START_SERVER_RR.getItem() : SpecialItem.START_SERVER.getItem());
+		} else if(getThisEnvironment() == this) {
+			inv.setItem(19, SpecialItem.STOP_SERVER.getItem());
+		} else {
+			inv.setItem(19, SpecialItem.QUEUE_SERVER.getItem());
+		}
 		inv.setItem(37, SpecialItem.CHANGE_NAME.getItem());
 		inv.setItem(40, SpecialItem.CHANGE_ICON.getItem());
 		inv.setItem(43, SpecialItem.DELETE_ENVIRONMENT.getItem());
@@ -466,7 +503,7 @@ public class Environment {
 	
 	public Inventory getSettingsInventory() {
 		Inventory inv = Bukkit.createInventory(null, 9, name + " - Settings");
-		if(forceRestart) inv.setItem(0, SpecialItem.FORCE_RESTART_TRUE.getItem());
+		if(forceRestart()) inv.setItem(0, SpecialItem.FORCE_RESTART_TRUE.getItem());
 		else inv.setItem(0, SpecialItem.FORCE_RESTART_FALSE.getItem());
 		if(saveWorld) inv.setItem(1, SpecialItem.SAVE_WORLD_TRUE.getItem());
 		else inv.setItem(1, SpecialItem.SAVE_WORLD_FALSE.getItem());
@@ -660,7 +697,7 @@ public class Environment {
 			fc.set("Environment." + e.getName() + ".plugins", e.getPluginNames());
 			fc.set("Environment." + e.getName() + ".worlds", e.serializeWorlds());
 			
-			fc.set("Environment." + e.getName() + ".settings.FR", e.forceRestart());
+			fc.set("Environment." + e.getName() + ".settings.FR", e.forceRestart);
 			fc.set("Environment." + e.getName() + ".settings.LFW", e.loadFreshWorld());
 			fc.set("Environment." + e.getName() + ".settings.SW", e.saveWorld());
 		}

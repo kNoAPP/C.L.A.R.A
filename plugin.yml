@@ -8,3 +8,5 @@ commands:
         description: Disable Clara
     world:
         description: Access a World
+    stay:
+        description: Opt-out of Restoration

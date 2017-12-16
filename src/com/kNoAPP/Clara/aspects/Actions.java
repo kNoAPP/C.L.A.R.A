@@ -1,10 +1,14 @@
 package com.kNoAPP.Clara.aspects;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Sound;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -22,11 +26,49 @@ import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.Clara;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
+import com.kNoAPP.Clara.bungee.BungeeReceivedEvent;
 import com.kNoAPP.Clara.data.Data;
 
 public class Actions implements Listener {
 	
+	public static List<UUID> restore = new ArrayList<UUID>(); 
 	public boolean bugPrevention = false;
+	
+	@EventHandler
+	public void onBungee(BungeeReceivedEvent e) {
+		if(e.getChannel().equals("restore")) {
+			FileConfiguration fc = Data.MAIN.getFileConfig();
+			if(fc.getBoolean("RestorePlayersToServers") && fc.getBoolean("Enable.MySQL_Bungee")) {
+				new BukkitRunnable() {
+					public void run() {
+						Player p = Bukkit.getPlayerExact(e.getArg(0));
+						Server s = Server.getServer(Integer.parseInt(e.getSource()));
+						if(p != null && p.isOnline() && s != null) restorePlayer(p, s);
+					}
+				}.runTaskLater(Clara.getPlugin(), 30L);
+			}
+		}
+	}
+	
+	private void restorePlayer(Player p, Server s) {
+		restore.add(p.getUniqueId());
+		p.sendMessage(Message.INFO.getMessage("Attempting to reconnect you to " + s.getName() + "."));
+		p.sendMessage(Message.INFO.getMessage("You may opt out at any time with /stay."));
+		
+		new BukkitRunnable() {
+			int i = 61; 
+			public void run() {
+				if(i > 0 && p != null && p.isOnline() && restore.contains(p.getUniqueId())) i--;
+				else this.cancel();
+				
+				if(s.isOnline()) {
+					p.sendMessage(Message.INFO.getMessage(ChatColor.GREEN + "You've been restored to " + s.getName() + "!"));
+					BungeeAPI.connect(p, s.getName());
+					this.cancel();
+				}
+			}
+		}.runTaskTimer(Clara.getPlugin(), 20L, 20L);
+	}
 
 	@EventHandler
 	public void onInteract(InventoryClickEvent e) {
@@ -83,7 +125,7 @@ public class Actions implements Listener {
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.settings." + env.getName().replace(" ", "_")));
 					}
-					if(is.isSimilar(SpecialItem.START_SERVER.getItem())) {
+					if(is.isSimilar(SpecialItem.START_SERVER.getItem()) || is.isSimilar(SpecialItem.START_SERVER_RR.getItem())) {
 						if(p.hasPermission("clara.start." + env.getName().replace(" ", "_"))) {
 							p.closeInventory();
 							p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been initialized."));
@@ -92,7 +134,7 @@ public class Actions implements Listener {
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.start." + env.getName().replace(" ", "_")));
 					}
-					if(is.isSimilar(SpecialItem.QUEUE_SERVER.getItem())) {
+					if(is.isSimilar(SpecialItem.QUEUE_SERVER.getItem()) || is.isSimilar(SpecialItem.QUEUE_SERVER_RR.getItem())) {
 						if(p.hasPermission("clara.queue." + env.getName().replace(" ", "_"))) {
 							p.closeInventory();
 							p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been queued."));
@@ -101,7 +143,7 @@ public class Actions implements Listener {
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.queue." + env.getName().replace(" ", "_"))); 
 					}
-					if(is.isSimilar(SpecialItem.STOP_SERVER.getItem())) {
+					if(is.isSimilar(SpecialItem.STOP_SERVER.getItem()) || is.isSimilar(SpecialItem.STOP_SERVER_RR.getItem())) {
 						if(p.hasPermission("clara.stop." + env.getName().replace(" ", "_"))) {
 							p.closeInventory();
 							Environment tenv = Environment.getThisEnvironment();
@@ -306,6 +348,7 @@ public class Actions implements Listener {
 	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
+		restore.remove(p.getUniqueId());
 		Environment.changingName.remove(p.getName());
 		Environment.settingWorld.remove(p.getName());
 	}
@@ -352,33 +395,19 @@ public class Actions implements Listener {
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent e) {
 		if(e.getMessage().equalsIgnoreCase("/reload")) {
-			if(Environment.getThisEnvironment().loadFreshWorld()) {
-				e.setCancelled(true);
-				if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
-					Server transfer = Server.transferServer(Server.getThisServer());
-					for(Player pl : Bukkit.getOnlinePlayers()) {
-						if(transfer != null) {
-							pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
-							pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
-							BungeeAPI.connect(pl, transfer.getName());
-						}
-					}
-					new BukkitRunnable() {
-						public void run() {
-							Bukkit.shutdown();
-						}
-					}.runTaskLater(Clara.getPlugin(), 20L);
-				} else Bukkit.shutdown();
-			}
+			e.setCancelled(true);
+			e.getPlayer().sendMessage(ChatColor.DARK_RED + "WARNING: " + ChatColor.RED + "Reloading with Clara can cause map corruption and file damage! This command has been disabled.");
 		}
 		if(e.getMessage().equalsIgnoreCase("/stop")) {
 			e.setCancelled(true);
+			
 			if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
 				Server transfer = Server.transferServer(Server.getThisServer());
 				for(Player pl : Bukkit.getOnlinePlayers()) {
 					if(transfer != null) {
 						pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
 						pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+						BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
 						BungeeAPI.connect(pl, transfer.getName());
 					}
 				}

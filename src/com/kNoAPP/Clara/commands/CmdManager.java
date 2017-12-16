@@ -9,6 +9,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import com.kNoAPP.Clara.Clara;
+import com.kNoAPP.Clara.aspects.Actions;
 import com.kNoAPP.Clara.aspects.Environment;
 import com.kNoAPP.Clara.aspects.Message;
 
@@ -35,6 +36,14 @@ public class CmdManager implements CommandExecutor {
 						}
 					}
 				}
+			}
+			if(cmd.getName().equalsIgnoreCase("stay")) {
+				if(p.hasPermission("clara.stay")) {
+					if(Actions.restore.contains(p.getUniqueId())) {
+						Actions.restore.remove(p.getUniqueId());
+						p.sendMessage(Message.INFO.getMessage("You have opt-ed out of sever restoration!"));
+					} else p.sendMessage(Message.INFO.getMessage("You are not being restored to a server!"));
+				} else p.sendMessage(Message.MISSING.getMessage("clara.stay"));
 			}
 			if(cmd.getName().equalsIgnoreCase("disable")) {
 				if(args.length == 0) {

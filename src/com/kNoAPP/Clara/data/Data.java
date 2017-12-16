@@ -2,6 +2,7 @@ package com.kNoAPP.Clara.data;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -76,14 +77,17 @@ public enum Data {
 				fc.set("MySQL.username", "root");
 				fc.set("MySQL.password", "psswd");
 				fc.set("Bungee.path", "/example/path/");
+				fc.set("RestorePlayersToServers", true);
 			}
 			if(this == ENVIRONMENT) {
 				fc.set("Version", "1.0.0");
 				File f = new File(Clara.getPlugin().getDataFolder().getAbsolutePath() + "/Database");
 				f.mkdirs();
 				fc.set("Database", f.getAbsolutePath());
+				fc.set("Fallback", "world");
 				fc.set("Active", 0);
 				fc.set("Queued", 0);
+				fc.set("UsedWorlds", new ArrayList<String>());
 			}
 			this.saveDataFile(fc);
 			this.logDataFile();

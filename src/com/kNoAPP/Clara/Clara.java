@@ -1,9 +1,13 @@
 package com.kNoAPP.Clara;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.WorldCreator;
+import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -21,6 +25,7 @@ import com.kNoAPP.Clara.data.MySQL;
 public class Clara extends JavaPlugin implements PluginMessageListener {
 
 	public static boolean failed = false;
+	public static boolean reload = false;
 	
 	@Override
 	public void onEnable() {
@@ -64,6 +69,8 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		
 		this.getCommand("clara").setExecutor(new CmdManager());
 		this.getCommand("disable").setExecutor(new CmdManager());
+		this.getCommand("world").setExecutor(new CmdManager());
+		this.getCommand("stay").setExecutor(new CmdManager());
 	}
 	
 	public static void importData() {
@@ -112,14 +119,19 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			}
 			
 			Environment.importEnvironments();
-			if(Environment.getQueuedEnvironment() != null) Environment.getQueuedEnvironment().load();
-			/*
-			if(Environment.getThisEnvironment() != null) {
-				Environment.getThisEnvironment().load();
-			} else {
-				Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + getPlugin().getName() + "] Could not find environment to load!");
+			
+			Environment act = Environment.getThisEnvironment(); 
+			FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+			List<String> used = fc.getStringList("UsedWorlds");
+			if(act != null) for(File f : act.getWorlds(true)) if(Bukkit.getWorld(f.getName()) == null) {
+				Bukkit.createWorld(new WorldCreator(f.getName()));
+				used.add(f.getName());
 			}
-			*/
+			fc.set("UsedWorlds", used);
+			Data.ENVIRONMENT.saveDataFile(fc);
+			
+			Environment que = Environment.getQueuedEnvironment();
+			if(que != null) que.load();
 		}
 	}
 	
@@ -129,10 +141,16 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setOnline(false, true);
 			
 			Environment tenv = Environment.getThisEnvironment();
-			if(tenv != null) if(tenv.loadFreshWorld()) tenv.loadWorlds();
+			if(tenv != null && !reload) if(tenv.loadFreshWorld()) tenv.loadWorlds();
 			
 			Environment.exportEnvironments();
 			MySQL.killConnection();
+		}
+		
+		if(!reload) {
+			FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+			fc.set("UsedWorlds", new ArrayList<String>());
+			Data.ENVIRONMENT.saveDataFile(fc);
 		}
 	}
 	

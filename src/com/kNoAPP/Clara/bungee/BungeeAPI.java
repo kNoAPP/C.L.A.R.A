@@ -15,9 +15,7 @@ import com.kNoAPP.Clara.Clara;
 public class BungeeAPI {
 
 	public static void onPluginMessageReceived(String channel, Player p, byte[] message) {
-		if(!channel.equals("BungeeCord")) {
-			return;
-		}
+		if(!channel.equals("BungeeCord")) return;
 		
 		ByteArrayDataInput in = ByteStreams.newDataInput(message);
 		String subchannel = in.readUTF();
