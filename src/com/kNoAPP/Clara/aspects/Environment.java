@@ -422,7 +422,8 @@ public class Environment {
 			if(d.exists()) {
 				World w = Bukkit.getWorld(d.getName());
 				if(w != null) {
-					for(Player pl : w.getPlayers()) pl.teleport(Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback")).getSpawnLocation());
+					World fall = Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback"));
+					if(fall != w) for(Player pl : w.getPlayers()) if(pl != null && fall != null) pl.teleport(fall.getSpawnLocation());
 					for(Chunk c : w.getLoadedChunks()) c.unload();
 					Bukkit.unloadWorld(w.getName(), false);
 					try {FileUtils.deleteDirectory(d);}
@@ -451,8 +452,8 @@ public class Environment {
 				catch(Exception ex) {Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Failed to save a world to the Database!");}
 			}
 			
-			Location fallback = Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback")).getSpawnLocation();
-			if(w != null) for(Player pl : w.getPlayers()) if(pl != null && fallback != null) pl.teleport(fallback);
+			World fall = Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback"));
+			if(w != null && fall != null) for(Player pl : w.getPlayers()) if(pl != null) pl.teleport(fall.getSpawnLocation());
 			for(Chunk c : w.getLoadedChunks()) c.unload();
 			
 			Bukkit.unloadWorld(w.getName(), false);
