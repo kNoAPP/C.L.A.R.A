@@ -115,7 +115,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
 				Server.getThisServer().logToDB();
 				Server.checkSetup();
-				Server.getThisServer().setOnline(true);
 			}
 			
 			Environment.importEnvironments();
@@ -132,6 +131,7 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			
 			Environment que = Environment.getQueuedEnvironment();
 			if(que != null) que.load();
+			else if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setOnline(true);
 		}
 	}
 	

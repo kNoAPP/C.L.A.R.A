@@ -484,13 +484,9 @@ public class Environment {
 		inv.setItem(4, getItem());
 		inv.setItem(22, SpecialItem.MANAGE_PLUGINS.getItem());
 		inv.setItem(25, SpecialItem.MANAGE_WORLDS.getItem());
-		if(getThisEnvironment() == null) {
-			inv.setItem(19, forceRestart() ? SpecialItem.START_SERVER_RR.getItem() : SpecialItem.START_SERVER.getItem());
-		} else if(getThisEnvironment() == this) {
-			inv.setItem(19, SpecialItem.STOP_SERVER.getItem());
-		} else {
-			inv.setItem(19, SpecialItem.QUEUE_SERVER.getItem());
-		}
+		if(getThisEnvironment() == null) inv.setItem(19, forceRestart() ? SpecialItem.START_SERVER_RR.getItem() : SpecialItem.START_SERVER.getItem());
+		else if(getThisEnvironment() == this) inv.setItem(19, forceRestart() ? SpecialItem.STOP_SERVER_RR.getItem() : SpecialItem.STOP_SERVER.getItem());
+		else inv.setItem(19, forceRestart() ? SpecialItem.QUEUE_SERVER_RR.getItem() : SpecialItem.QUEUE_SERVER.getItem());
 		inv.setItem(37, SpecialItem.CHANGE_NAME.getItem());
 		inv.setItem(40, SpecialItem.CHANGE_ICON.getItem());
 		inv.setItem(43, SpecialItem.DELETE_ENVIRONMENT.getItem());
