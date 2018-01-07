@@ -23,6 +23,7 @@ public class CmdManager implements CommandExecutor {
 					p.sendMessage(Message.INFO.getMessage("Code Loading and Routine Analysis - By kNoAPP"));
 					p.sendMessage(ChatColor.DARK_GREEN + "----------");
 					p.sendMessage(Message.HELP.getMessage("/clara guitool"));
+					p.sendMessage(Message.HELP.getMessage("/clara disable"));
 					return true;
 				}
 				if(args.length == 1) {
@@ -35,6 +36,16 @@ public class CmdManager implements CommandExecutor {
 							return false;
 						}
 					}
+					if(args[0].equalsIgnoreCase("disable")) {
+						if(p.hasPermission("clara.disable")) {
+							p.sendMessage(ChatColor.GREEN + "Clara is being disabled...");
+							p.sendMessage(ChatColor.GRAY + "You may now safely edit configuration files.");
+							Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
+						} else {
+							p.sendMessage(Message.MISSING.getMessage("clara.disable"));
+							return false;
+						}
+					}
 				}
 			}
 			if(cmd.getName().equalsIgnoreCase("stay")) {
@@ -44,15 +55,6 @@ public class CmdManager implements CommandExecutor {
 						p.sendMessage(Message.INFO.getMessage("You have opt-ed out of sever restoration!"));
 					} else p.sendMessage(Message.INFO.getMessage("You are not being restored to a server!"));
 				} else p.sendMessage(Message.MISSING.getMessage("clara.stay"));
-			}
-			if(cmd.getName().equalsIgnoreCase("disable")) {
-				if(args.length == 0) {
-					if(p.hasPermission("clara.disable")) {
-						p.sendMessage(ChatColor.GREEN + "Clara is being disabled...");
-						p.sendMessage(ChatColor.GRAY + "You may now safely edit configuration files.");
-						Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
-					}
-				}
 			}
 			if(cmd.getName().equalsIgnoreCase("world")) {
 				if(args.length == 1) {

@@ -56,7 +56,7 @@ public class Actions implements Listener {
 		p.sendMessage(Message.INFO.getMessage("You may opt out at any time with /stay."));
 		
 		new BukkitRunnable() {
-			int i = 61; 
+			int i = 181; 
 			public void run() {
 				if(i > 0 && p != null && p.isOnline() && restore.contains(p.getUniqueId())) i--;
 				else this.cancel();
