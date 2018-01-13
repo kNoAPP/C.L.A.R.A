@@ -69,7 +69,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		this.getServer().getPluginManager().registerEvents(new Actions(), this);
 		
 		this.getCommand("clara").setExecutor(new CmdManager());
-		this.getCommand("disable").setExecutor(new CmdManager());
 		this.getCommand("world").setExecutor(new CmdManager());
 		this.getCommand("stay").setExecutor(new CmdManager());
 	}
