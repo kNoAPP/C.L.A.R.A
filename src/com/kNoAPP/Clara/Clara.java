@@ -21,24 +21,25 @@ import com.kNoAPP.Clara.commands.CmdManager;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.data.MySQL;
 
-//Copyright Alden "kNoAPP" Bansemer 2017
+//Copyright Alden "kNoAPP" Bansemer 2018
 public class Clara extends JavaPlugin implements PluginMessageListener {
 
+	private static Plugin plugin;
+	
 	public static boolean failed = false;
 	public static boolean reload = false;
 	
 	@Override
 	public void onEnable() {
 		long tStart = System.currentTimeMillis();
+		plugin = this;
 		importData();
 		register();
 		importAspects();
 		long tEnd = System.currentTimeMillis();
 		getPlugin().getLogger().info("Successfully Enabled! (" + (tEnd - tStart) + " ms)");
 		
-		if(failed) {
-			getPlugin().getPluginLoader().disablePlugin(this);
-		}
+		if(failed) getPlugin().getPluginLoader().disablePlugin(this);
 	}
 	
 	@Override
@@ -77,11 +78,8 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		getPlugin().getLogger().info("Importing .yml Files...");
 		for(Data d : Data.values()) {
 			if(d != Data.CONFIG) {
-				if(Data.CONFIG.getFileConfig().getBoolean("UseMainFolder") == true) {
-					d.setFile("");
-				} else {
-					d.setFile(Data.CONFIG.getFileConfig().getString("UseCustomFolder"));
-				}
+				if(Data.CONFIG.getFileConfig().getBoolean("UseMainFolder") == true) d.setFile("");
+				else d.setFile(Data.CONFIG.getFileConfig().getString("UseCustomFolder"));
 			}
 			d.createDataFile();
 		}
@@ -89,9 +87,7 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	
 	public static void exportData() {
 		getPlugin().getLogger().info("Exporting .yml Files...");
-		for(Data d : Data.values()) {
-			d.logDataFile();
-		}
+		for(Data d : Data.values()) d.logDataFile();
 	}
 	
 	public static void importAspects() {
@@ -131,7 +127,11 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			
 			Environment que = Environment.getQueuedEnvironment();
 			if(que != null) que.load();
-			else if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setOnline(true);
+			else if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+				Server s = Server.getThisServer();
+				s.setOnline(true);
+				s.setPlayers(Bukkit.getOnlinePlayers().size());
+			}
 		}
 	}
 	
@@ -155,6 +155,6 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	}
 	
 	public static Plugin getPlugin() {
-		return Bukkit.getPluginManager().getPlugin("Clara");
+		return plugin;
 	}
 }

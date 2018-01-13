@@ -1,7 +1,6 @@
 package com.kNoAPP.Clara.aspects;
 
 import java.io.File;
-import java.sql.PreparedStatement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +36,14 @@ public class Server {
 		return port;
 	}
 	
+	public int getPlayers() {
+		return MySQL.getInt(Table.SERVER.getName(), "players", "name", name);
+	}
+	
+	public void setPlayers(int players) {
+		MySQL.update(Table.SERVER.getName(), "players", players, "name", name);
+	}
+	
 	public boolean isOnline() {
 		return Tools.convertBoolean(MySQL.getInt(Table.SERVER.getName(), "online", "name", name));
 	}
@@ -55,13 +62,7 @@ public class Server {
 			//Add Server
 			new BukkitRunnable() {
 				public void run() {
-					try {
-						PreparedStatement ps = MySQL.getConnection().prepareStatement("INSERT INTO `" + Table.SERVER.getName() + "` values('" + Server.this.getName() + "', " + Server.this.getPort() + ", 1);");
-						ps.execute();
-						ps.close();
-					} catch(Exception e) {
-						e.printStackTrace();
-					}
+					MySQL.insert(Table.SERVER.getName(), new String[]{name, port+"", "1", "0"});
 				}
 			}.runTaskAsynchronously(Clara.getPlugin());
 		} else if(MySQL.getInt(Table.SERVER.getName(), "port", "name", name) != port) {
@@ -75,20 +76,12 @@ public class Server {
 	}
 	
 	public static Server getServer(String name) {
-		for(Server s : servers) {
-			if(s.getName().equals(name)) {
-				return s;
-			}
-		}
+		for(Server s : servers) if(s.getName().equals(name)) return s;
 		return null;
 	}
 	
 	public static Server getServer(int port) {
-		for(Server s : servers) {
-			if(s.getPort() == port) {
-				return s;
-			}
-		}
+		for(Server s : servers) if(s.getPort() == port) return s;
 		return null;
 	}
 	
@@ -117,19 +110,13 @@ public class Server {
 	}
 	
 	public static void checkSetup() {
-		for(String s : MySQL.getStringList(Table.SERVER.getName(), "name")) {
-			if(getServer(s) == null) {
+		for(String s : MySQL.getStringList(Table.SERVER.getName(), "name")) 
+			if(getServer(s) == null) 
 				MySQL.delete(Table.SERVER.getName(), "name", s);
-			}
-		}
 	}
 	
 	public static Server transferServer(Server from) {
-		for(Server s : servers) {
-			if(s != from && s.isOnline()) {
-				return s;
-			}
-		}
+		for(Server s : servers) if(s != from && s.isOnline()) return s;
 		return null;
 	}
 }

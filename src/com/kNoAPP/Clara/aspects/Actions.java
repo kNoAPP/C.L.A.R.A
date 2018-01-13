@@ -17,6 +17,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerLoginEvent.Result;
 import org.bukkit.event.player.PlayerQuitEvent;
@@ -346,11 +347,18 @@ public class Actions implements Listener {
 	}
 	
 	@EventHandler
+	public void onJoin(PlayerJoinEvent e) {
+		Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
+	}
+	
+	@EventHandler
 	public void onLeave(PlayerQuitEvent e) {
 		Player p = e.getPlayer();
 		restore.remove(p.getUniqueId());
 		Environment.changingName.remove(p.getName());
 		Environment.settingWorld.remove(p.getName());
+		
+		Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

@@ -1,6 +1,7 @@
 package com.kNoAPP.Clara.data;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -73,10 +74,84 @@ public class MySQL {
 	
 	public static void createTables() {
 		for(Table t : Table.values()) {
+			if(!exists(t.getName())) {
+				try {
+					Statement s = connection.createStatement();
+					s.executeUpdate(t.getSetup());
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+			} else if(t == Table.SERVER && !exists(Table.SERVER.getName(), "players"))
+				addAlter(Table.SERVER.getName(), "players", "int", "0", "online");
+		}
+	}
+	
+	/**
+	 * Insert a dataset into a table.
+	 * @param table - The Table to be used.
+	 * @param values - Currently supporting Strings and ints
+	 */
+	public static synchronized void insert(String table, String[] values) {
+		String insert = "(";
+		for(String s : values) insert += ", '" + s + "'";
+		insert = insert.replaceFirst(", ", "") + ");";
+		
+		if(connection != null) {
+			try {
+				PreparedStatement ps = connection.prepareStatement("INSERT INTO `" + table + "` values" + insert);
+				ps.execute();
+				ps.close();
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static synchronized boolean exists(String table) {
+		if(connection != null) {
+			try {
+				DatabaseMetaData md = connection.getMetaData();
+				ResultSet rs = md.getColumns(null, null, table, null);
+				return rs.next();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	
+	public static synchronized boolean exists(String table, String column) {
+		if(connection != null) {
+			try {
+				DatabaseMetaData md = connection.getMetaData();
+				ResultSet rs = md.getColumns(null, null, table, column);
+				return rs.next();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+		return false;
+	}
+	
+	public static synchronized void addAlter(String table, String column, String type, String after) {
+		if(connection != null) {
 			try {
 				Statement s = connection.createStatement();
-				s.executeUpdate(t.getSetup());
-			} catch (SQLException e) {
+				s.executeUpdate("ALTER TABLE `" + table + "` ADD `" + column + "` " + type + " AFTER `" + after + "`;");
+				s.close();
+			} catch(Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+	public static synchronized void addAlter(String table, String column, String type, String def, String after) {
+		if(connection != null) {
+			try {
+				Statement s = connection.createStatement();
+				s.executeUpdate("ALTER TABLE `" + table + "` ADD `" + column + "` " + type + " DEFAULT '" + def + "' AFTER `" + after + "`;");
+				s.close();
+			} catch(Exception e) {
 				e.printStackTrace();
 			}
 		}
