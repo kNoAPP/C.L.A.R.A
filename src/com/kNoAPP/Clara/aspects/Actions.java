@@ -402,28 +402,31 @@ public class Actions implements Listener {
 	
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent e) {
-		if(e.getMessage().equalsIgnoreCase("/reload")) {
-			e.setCancelled(true);
-			e.getPlayer().sendMessage(ChatColor.DARK_RED + "WARNING: " + ChatColor.RED + "Reloading with Clara can cause map corruption and file damage! This command has been disabled.");
-		}
-		if(e.getMessage().equalsIgnoreCase("/stop")) {
-			e.setCancelled(true);
-			
-			if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
-				Server transfer = Server.transferServer(Server.getThisServer());
-				for(Player pl : Bukkit.getOnlinePlayers()) {
-					if(transfer != null) {
-						pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
-						pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
-						BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
-						BungeeAPI.connect(pl, transfer.getName());
+		Player p = e.getPlayer();
+		if(p.isOp()) {
+			if(e.getMessage().equalsIgnoreCase("/reload")) {
+				e.setCancelled(true);
+				e.getPlayer().sendMessage(ChatColor.DARK_RED + "WARNING: " + ChatColor.RED + "Reloading with Clara can cause map corruption and file damage! This command has been disabled.");
+			}
+			if(e.getMessage().equalsIgnoreCase("/stop")) {
+				e.setCancelled(true);
+				
+				if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+					Server transfer = Server.transferServer(Server.getThisServer());
+					for(Player pl : Bukkit.getOnlinePlayers()) {
+						if(transfer != null) {
+							pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
+							pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+							BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
+							BungeeAPI.connect(pl, transfer.getName());
+						}
 					}
+					new BukkitRunnable() {
+						public void run() {
+							Bukkit.shutdown();
+						}
+					}.runTaskLater(Clara.getPlugin(), 40L);
 				}
-				new BukkitRunnable() {
-					public void run() {
-						Bukkit.shutdown();
-					}
-				}.runTaskLater(Clara.getPlugin(), 40L);
 			}
 		}
 	}
