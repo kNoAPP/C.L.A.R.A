@@ -46,7 +46,7 @@ public class Actions implements Listener {
 						Server s = Server.getServer(Integer.parseInt(e.getSource()));
 						if(p != null && p.isOnline() && s != null) restorePlayer(p, s);
 					}
-				}.runTaskLater(Clara.getPlugin(), 30L);
+				}.runTaskLater(Clara.getPlugin(), 40L);
 			}
 		}
 	}
@@ -68,7 +68,7 @@ public class Actions implements Listener {
 					this.cancel();
 				}
 			}
-		}.runTaskTimer(Clara.getPlugin(), 20L, 20L);
+		}.runTaskTimer(Clara.getPlugin(), 400L, 20L);
 	}
 
 	@EventHandler

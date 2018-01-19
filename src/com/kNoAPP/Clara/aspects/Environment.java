@@ -311,6 +311,7 @@ public class Environment {
 		}
 		
 		if(forceRestart()) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Kicking Players...");
 			Server transfer = Server.transferServer(Server.getThisServer());
 			for(Player pl : Bukkit.getOnlinePlayers()) {
 				if(transfer != null) {
@@ -345,6 +346,8 @@ public class Environment {
 		}.runTaskLater(Clara.getPlugin(), delay);
 		*/
 		
+		Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Importing Worlds/Data...");
+		
 		loadPlugins();
 		loadWorlds();
 		
@@ -355,6 +358,7 @@ public class Environment {
 		
 		new BukkitRunnable() {
 			public void run() {
+				Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Resetting...");
 				if(forceRestart()) Bukkit.shutdown();
 				else {
 					Clara.reload = true;
@@ -366,8 +370,15 @@ public class Environment {
 	
 	public void unload() {
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + Clara.getPlugin().getName() + "] Unloading Environment [" + getName() + "]");
+		long save = 0L;
+		long unload = 60L;
+		long end = 100L;
 		
 		if(forceRestart()) {
+			Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Kicking Players...");
+			save += 40L;
+			unload += 40L;
+			end += 40L;
 			Server transfer = Server.transferServer(Server.getThisServer());
 			for(Player pl : Bukkit.getOnlinePlayers()) {
 				if(transfer != null) {
@@ -381,22 +392,35 @@ public class Environment {
 			}
 		}
 		
-		unloadPlugins();
-		unloadWorlds();
-		
-		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
-		fc.set("Active", 0);
-		Data.ENVIRONMENT.saveDataFile(fc);
+		new BukkitRunnable() {
+			public void run() {
+				Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Saving Worlds...");
+				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "save-all");
+			}
+		}.runTaskLater(Clara.getPlugin(), save);
 		
 		new BukkitRunnable() {
 			public void run() {
+				Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Exporting Worlds/Data...");
+				unloadPlugins();
+				unloadWorlds();
+				
+				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+				fc.set("Active", 0);
+				Data.ENVIRONMENT.saveDataFile(fc);
+			}
+		}.runTaskLater(Clara.getPlugin(), unload);
+		
+		new BukkitRunnable() {
+			public void run() {
+				Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Resetting...");
 				if(forceRestart(false)) Bukkit.shutdown();
 				else {
 					Clara.reload = true;
 					Bukkit.reload(); //Try this
 				}
 			}
-		}.runTaskLater(Clara.getPlugin(), 40L);
+		}.runTaskLater(Clara.getPlugin(), end);
 	}
 	
 	public void loadPlugins() {
@@ -419,15 +443,8 @@ public class Environment {
 			EWorld ew = getEWorld(f.getName(), false);
 			File d = new File(Bukkit.getWorldContainer(), ew.getCopiedName());
 			if(d.exists()) {
-				World w = Bukkit.getWorld(d.getName());
-				if(w != null) {
-					World fall = Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback"));
-					if(fall != w) for(Player pl : w.getPlayers()) if(pl != null && fall != null) pl.teleport(fall.getSpawnLocation());
-					for(Chunk c : w.getLoadedChunks()) c.unload();
-					Bukkit.unloadWorld(w.getName(), false);
-					try {FileUtils.deleteDirectory(d);}
-					catch(Exception ex) {ex.printStackTrace();}
-				}
+				try {FileUtils.deleteDirectory(d);}
+				catch(Exception ex) {ex.printStackTrace();}
 			}
 			try {FileUtils.copyDirectory(f, d);}
 			catch(Exception ex) {ex.printStackTrace();}
@@ -440,7 +457,6 @@ public class Environment {
 		for(File f : getWorlds(true)) {
 			World w = Bukkit.getWorld(f.getName());
 			if(saveWorld) {
-				w.save();
 				EWorld ew = getEWorld(f.getName(), true);
 				File d = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"), ew.getName());
 				
@@ -470,10 +486,6 @@ public class Environment {
 				}
 			}.runTaskLater(Clara.getPlugin(), 20L);
 		}
-
-		try {Class.forName("net.minecraft.server." + Tools.getVersion() + ".RegionFileCache").getMethod("a").invoke(null);}
-		catch (Exception ex) {ex.printStackTrace();}
-		System.gc();
 	}
 	
 	public Inventory getSubInventory() {
