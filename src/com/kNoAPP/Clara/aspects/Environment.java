@@ -23,6 +23,8 @@ import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.Clara;
+import com.kNoAPP.Clara.aspects.SpecialItem.DynamicItem;
+import com.kNoAPP.Clara.aspects.SpecialItem.StaticItem;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.data.Data;
 import com.kNoAPP.Clara.utils.Tools;
@@ -306,7 +308,7 @@ public class Environment {
 		if(isMissingPlugins(false)) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] This setup is missing plugins!");
 			for(String s : getMissingPlugins(false)) {
-				Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] " + ChatColor.GOLD + s);
+				Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] " + ChatColor.AQUA + s);
 			}
 		}
 		
@@ -490,17 +492,15 @@ public class Environment {
 	
 	public Inventory getSubInventory() {
 		Inventory inv = Bukkit.createInventory(null, 54, name);
-		inv.setItem(0, SpecialItem.BACK.getItem());
-		inv.setItem(8, SpecialItem.SETTINGS.getItem());
+		inv.setItem(0, StaticItem.BACK.getItem());
+		inv.setItem(8, StaticItem.SETTINGS.getItem());
 		inv.setItem(4, getItem());
-		inv.setItem(22, SpecialItem.MANAGE_PLUGINS.getItem());
-		inv.setItem(25, SpecialItem.MANAGE_WORLDS.getItem());
-		if(getThisEnvironment() == null) inv.setItem(19, forceRestart() ? SpecialItem.START_SERVER_RR.getItem() : SpecialItem.START_SERVER.getItem());
-		else if(getThisEnvironment() == this) inv.setItem(19, forceRestart() ? SpecialItem.STOP_SERVER_RR.getItem() : SpecialItem.STOP_SERVER.getItem());
-		else inv.setItem(19, forceRestart() ? SpecialItem.QUEUE_SERVER_RR.getItem() : SpecialItem.QUEUE_SERVER.getItem());
-		inv.setItem(37, SpecialItem.CHANGE_NAME.getItem());
-		inv.setItem(40, SpecialItem.CHANGE_ICON.getItem());
-		inv.setItem(43, SpecialItem.DELETE_ENVIRONMENT.getItem());
+		inv.setItem(22, StaticItem.MANAGE_PLUGINS.getItem());
+		inv.setItem(25, StaticItem.MANAGE_WORLDS.getItem());
+		inv.setItem(19, DynamicItem.POWER.getItem(this));
+		inv.setItem(37, StaticItem.CHANGE_NAME.getItem());
+		inv.setItem(40, StaticItem.CHANGE_ICON.getItem());
+		inv.setItem(43, StaticItem.DELETE_ENVIRONMENT.getItem());
 		return inv;
 	}
 	
@@ -511,13 +511,10 @@ public class Environment {
 	
 	public Inventory getSettingsInventory() {
 		Inventory inv = Bukkit.createInventory(null, 9, name + " - Settings");
-		if(forceRestart()) inv.setItem(0, SpecialItem.FORCE_RESTART_TRUE.getItem());
-		else inv.setItem(0, SpecialItem.FORCE_RESTART_FALSE.getItem());
-		if(saveWorld) inv.setItem(1, SpecialItem.SAVE_WORLD_TRUE.getItem());
-		else inv.setItem(1, SpecialItem.SAVE_WORLD_FALSE.getItem());
-		if(loadFreshWorld) inv.setItem(2, SpecialItem.LOAD_WORLD_TRUE.getItem());
-		else inv.setItem(2, SpecialItem.LOAD_WORLD_FALSE.getItem());
-		inv.setItem(8, SpecialItem.BACK.getItem());
+		inv.setItem(0, DynamicItem.FORCE_RESTART.getItem(this));
+		inv.setItem(1, DynamicItem.SAVE_WORLD.getItem(this));
+		inv.setItem(2, DynamicItem.LOAD_WORLD.getItem(this));
+		inv.setItem(8, StaticItem.BACK.getItem());
 		return inv;
 	}
 	
@@ -529,9 +526,9 @@ public class Environment {
 	public Inventory getMPInventory(int page) {
 		Inventory inv = Bukkit.createInventory(null, 54, name + " - Plugins");
 		List<File> files = getAllFiles(false, false);
-		inv.setItem(49, SpecialItem.BACK.getItem());
-		if(files.size() >= page*45) inv.setItem(53, SpecialItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
-		if(page > 1) inv.setItem(45, SpecialItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
+		inv.setItem(49, StaticItem.BACK.getItem());
+		if(files.size() >= page*45) inv.setItem(53, StaticItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
+		if(page > 1) inv.setItem(45, StaticItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
 		
 		for(int i=0; i<45; i++) {
 			if(i+((page-1)*45) < files.size()) {
@@ -569,9 +566,9 @@ public class Environment {
 	public Inventory getMWInventory(int page) {
 		Inventory inv = Bukkit.createInventory(null, 54, name + " - Worlds");
 		List<File> files = getAllFiles(false, true);
-		inv.setItem(49, SpecialItem.BACK.getItem());
-		if(files.size() >= page*45) inv.setItem(53, SpecialItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
-		if(page > 1) inv.setItem(45, SpecialItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
+		inv.setItem(49, StaticItem.BACK.getItem());
+		if(files.size() >= page*45) inv.setItem(53, StaticItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
+		if(page > 1) inv.setItem(45, StaticItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
 		
 		for(int i=0; i<45; i++) {
 			if(i+((page-1)*45) < files.size()) {
@@ -612,7 +609,7 @@ public class Environment {
 		Inventory inv = Bukkit.createInventory(null, 9, name + " - Change Icon");
 		for(int a=0; a<9; a++) {
 			if(a != 4) {
-				inv.setItem(a, SpecialItem.PLACE_HOLDER.getItem());
+				inv.setItem(a, StaticItem.PLACE_HOLDER.getItem());
 			}
 		}
 		return inv;
@@ -740,15 +737,15 @@ public class Environment {
 	
 	public static Inventory getMainInventory(int page) {
 		Inventory inv = Bukkit.createInventory(null, 54, "Clara Setups");
-		inv.setItem(4, SpecialItem.CLARA_SETUPS.getItem());
-		if(environments.size() >= page*45) inv.setItem(8, SpecialItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
-		if(page > 1) inv.setItem(0, SpecialItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
+		inv.setItem(4, StaticItem.CLARA_SETUPS.getItem());
+		if(environments.size() >= page*45) inv.setItem(8, StaticItem.NEXT_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page+1)}).getItem());
+		if(page > 1) inv.setItem(0, StaticItem.PREVIOUS_ICON.setLores(new String[]{ChatColor.GRAY + "Turn to page " + (page-1)}).getItem());
 		
 		for(int i=0; i<45; i++) {
 			if(i+((page-1)*45) < environments.size()) {
 				Environment e = environments.get(i+((page-1)*45));
 				inv.setItem(i+9, e.getItem());
-			} else inv.setItem(i+9, SpecialItem.NEW_SETUP.getItem());
+			} else inv.setItem(i+9, StaticItem.NEW_SETUP.getItem());
 		}
 
 		return inv;

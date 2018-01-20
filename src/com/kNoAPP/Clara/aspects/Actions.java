@@ -26,6 +26,8 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.Clara;
+import com.kNoAPP.Clara.aspects.SpecialItem.DynamicItem;
+import com.kNoAPP.Clara.aspects.SpecialItem.StaticItem;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.bungee.BungeeReceivedEvent;
 import com.kNoAPP.Clara.data.Data;
@@ -60,7 +62,10 @@ public class Actions implements Listener {
 			int i = 181; 
 			public void run() {
 				if(i > 0 && p != null && p.isOnline() && restore.contains(p.getUniqueId())) i--;
-				else this.cancel();
+				else {
+					this.cancel();
+					return;
+				}
 				
 				if(s.isOnline()) {
 					p.sendMessage(Message.INFO.getMessage(ChatColor.GREEN + "You've been restored to " + s.getName() + "!"));
@@ -80,12 +85,12 @@ public class Actions implements Listener {
 		if(is != null) {
 			if(inv.getName().equals(Environment.getMainInventory(1).getName())) {
 				e.setCancelled(true);
-				if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.NEXT_ICON.setLores(null).getItem())) {
+				if(StaticItem.cleanLores(is.clone()).isSimilar(StaticItem.NEXT_ICON.setLores(null).getItem())) {
 					int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
 					Environment.openMainInventory(p, page);
 					return;
 				}
-				if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.PREVIOUS_ICON.setLores(null).getItem())) {
+				if(StaticItem.cleanLores(is.clone()).isSimilar(StaticItem.PREVIOUS_ICON.setLores(null).getItem())) {
 					int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
 					Environment.openMainInventory(p, page);
 					return;
@@ -98,7 +103,7 @@ public class Actions implements Listener {
 						} else p.sendMessage(Message.MISSING.getMessage("clara.setup." + env.getName().replace(" ", "_")));
 					}
 				}
-				if(is.isSimilar(SpecialItem.NEW_SETUP.getItem())) {
+				if(is.isSimilar(StaticItem.NEW_SETUP.getItem())) {
 					if(p.hasPermission("clara.createsetup")) {
 						Environment.createBasicSetup().openSubInventory(p);
 						return;
@@ -108,77 +113,62 @@ public class Actions implements Listener {
 				return;
 			}
 			
+			Environment cEnv = Environment.getThisEnvironment();
 			for(Environment env : Environment.environments) {
 				if(inv.getName().equals(env.getSubInventory().getName())) {
 					e.setCancelled(true);
-					if(is.isSimilar(SpecialItem.BACK.getItem())) {
+					if(is.isSimilar(StaticItem.BACK.getItem())) {
 						Environment.openMainInventory(p, 1);
 						return;
 					}
-					if(is.isSimilar(SpecialItem.SETTINGS.getItem())) {
+					if(is.isSimilar(StaticItem.SETTINGS.getItem())) {
 						if(p.hasPermission("clara.settings." + env.getName().replace(" ", "_"))) {
-							if(Environment.getThisEnvironment() != env) {
-								env.openSettingsInventory(p);
-							} else {
-								p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
-								p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
-							}
+							env.openSettingsInventory(p);
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.settings." + env.getName().replace(" ", "_")));
 					}
-					if(is.isSimilar(SpecialItem.START_SERVER.getItem()) || is.isSimilar(SpecialItem.START_SERVER_RR.getItem())) {
-						if(p.hasPermission("clara.start." + env.getName().replace(" ", "_"))) {
-							p.closeInventory();
-							p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been initialized."));
-							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-							env.load();
-							return;
-						} else p.sendMessage(Message.MISSING.getMessage("clara.start." + env.getName().replace(" ", "_")));
-					}
-					if(is.isSimilar(SpecialItem.QUEUE_SERVER.getItem()) || is.isSimilar(SpecialItem.QUEUE_SERVER_RR.getItem())) {
-						if(p.hasPermission("clara.queue." + env.getName().replace(" ", "_"))) {
-							p.closeInventory();
-							p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been queued."));
-							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-							env.load();
-							return;
-						} else p.sendMessage(Message.MISSING.getMessage("clara.queue." + env.getName().replace(" ", "_"))); 
-					}
-					if(is.isSimilar(SpecialItem.STOP_SERVER.getItem()) || is.isSimilar(SpecialItem.STOP_SERVER_RR.getItem())) {
-						if(p.hasPermission("clara.stop." + env.getName().replace(" ", "_"))) {
-							p.closeInventory();
-							Environment tenv = Environment.getThisEnvironment();
-							if(tenv != null) { //Not Needed. There just in case.
-								p.sendMessage(Message.INFO.getMessage("Environment " + tenv.getName() + " is being deconstructed."));
+					if(is.isSimilar(DynamicItem.POWER.getItem(env))) {
+						if(cEnv == null) {
+							if(p.hasPermission("clara.start." + env.getName().replace(" ", "_"))) {
+								p.closeInventory();
+								p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been initialized."));
 								p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
-								tenv.unload();
-							}
-							return;
-						} else p.sendMessage(Message.MISSING.getMessage("clara.stop." + env.getName().replace(" ", "_")));
+								env.load();
+								return;
+							} else p.sendMessage(Message.MISSING.getMessage("clara.start." + env.getName().replace(" ", "_")));
+						} else if(cEnv == env) {
+							if(p.hasPermission("clara.stop." + env.getName().replace(" ", "_"))) {
+								p.closeInventory();
+								if(cEnv != null) { //Not Needed. There just in case.
+									p.sendMessage(Message.INFO.getMessage("Environment " + cEnv.getName() + " is being deconstructed."));
+									p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+									cEnv.unload();
+								}
+								return;
+							} else p.sendMessage(Message.MISSING.getMessage("clara.stop." + env.getName().replace(" ", "_")));
+						} else {
+							if(p.hasPermission("clara.queue." + env.getName().replace(" ", "_"))) {
+								p.closeInventory();
+								p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been queued."));
+								p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+								env.load();
+								return;
+							} else p.sendMessage(Message.MISSING.getMessage("clara.queue." + env.getName().replace(" ", "_")));
+						}
 					}
-					if(is.isSimilar(SpecialItem.MANAGE_WORLDS.getItem())) {
+					if(is.isSimilar(StaticItem.MANAGE_WORLDS.getItem())) {
 						if(p.hasPermission("clara.worlds." + env.getName().replace(" ", "_"))) {
-							if(Environment.getThisEnvironment() != env) {
-								env.openMWInventory(p, 1);
-							} else {
-								p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
-								p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
-							}
+							env.openMWInventory(p, 1);
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.worlds." + env.getName().replace(" ", "_")));
 					}
-					if(is.isSimilar(SpecialItem.MANAGE_PLUGINS.getItem())) {
+					if(is.isSimilar(StaticItem.MANAGE_PLUGINS.getItem())) {
 						if(p.hasPermission("clara.plugins." + env.getName().replace(" ", "_"))) {
-							if(Environment.getThisEnvironment() != env) {
-								env.openMPInventory(p, 1);
-							} else {
-								p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
-								p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
-							}
+							env.openMPInventory(p, 1);
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.plugins." + env.getName().replace(" ", "_")));
 					}
-					if(is.isSimilar(SpecialItem.CHANGE_NAME.getItem())) {
+					if(is.isSimilar(StaticItem.CHANGE_NAME.getItem())) {
 						if(p.hasPermission("clara.changename." + env.getName().replace(" ", "_"))) {
 							p.closeInventory();
 							Environment.changingName.put(p.getName(), env);
@@ -187,15 +177,15 @@ public class Actions implements Listener {
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.changename." + env.getName().replace(" ", "_")));
 					}
-					if(is.isSimilar(SpecialItem.CHANGE_ICON.getItem())) {
+					if(is.isSimilar(StaticItem.CHANGE_ICON.getItem())) {
 						if(p.hasPermission("clara.changeicon." + env.getName().replace(" ", "_"))) {
 							env.openIconInventory(p);
 							return;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.changeicon." + env.getName().replace(" ", "_")));
 					}
-					if(is.isSimilar(SpecialItem.DELETE_ENVIRONMENT.getItem())) {
+					if(is.isSimilar(StaticItem.DELETE_ENVIRONMENT.getItem())) {
 						if(p.hasPermission("clara.delete." + env.getName().replace(" ", "_"))) {
-							if(Environment.getThisEnvironment() != env) {
+							if(cEnv != env) {
 								env.remove();
 								p.sendMessage(Message.INFO.getMessage("Environment " + env.getName() + " has been removed."));
 								Environment.openMainInventory(p, 1);
@@ -211,38 +201,40 @@ public class Actions implements Listener {
 				}
 				if(inv.getName().equals(env.getSettingsInventory().getName())) {
 					e.setCancelled(true);
-					if(is.isSimilar(SpecialItem.BACK.getItem())) {
+					if(is.isSimilar(StaticItem.BACK.getItem())) {
 						env.openSubInventory(p);
 						return;
 					}
-					if(is.isSimilar(SpecialItem.FORCE_RESTART_FALSE.getItem())) {
-						env.setForceRestart(true);
-						env.openSettingsInventory(p);
+					if(is.isSimilar(DynamicItem.FORCE_RESTART.getItem(env))) {
+						if(env != cEnv) {
+							env.setForceRestart(env.forceRestart() ? false : true);
+							env.openSettingsInventory(p);
+						} else {
+							p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
+							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+							return;
+						}
 						return;
 					}
-					if(is.isSimilar(SpecialItem.FORCE_RESTART_TRUE.getItem())) {
-						env.setForceRestart(false);
-						env.openSettingsInventory(p);
-						return;
+					if(is.isSimilar(DynamicItem.SAVE_WORLD.getItem(env))) {
+						if(env != cEnv) {
+							env.setSaveWorld(env.saveWorld() ? false : true);
+							env.openSettingsInventory(p);
+							return;
+						} else {
+							p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
+							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+							return;
+						}
 					}
-					if(is.isSimilar(SpecialItem.SAVE_WORLD_FALSE.getItem())) {
-						env.setSaveWorld(true);
-						env.openSettingsInventory(p);
-						return;
-					}
-					if(is.isSimilar(SpecialItem.SAVE_WORLD_TRUE.getItem())) {
-						env.setSaveWorld(false);
-						env.openSettingsInventory(p);
-						return;
-					}
-					if(is.isSimilar(SpecialItem.LOAD_WORLD_FALSE.getItem())) {
-						env.setLoadFreshWorld(true);
-						env.openSettingsInventory(p);
-						return;
-					}
-					if(is.isSimilar(SpecialItem.LOAD_WORLD_TRUE.getItem())) {
-						env.setLoadFreshWorld(false);
-						env.openSettingsInventory(p);
+					if(is.isSimilar(DynamicItem.LOAD_WORLD.getItem(env))) {
+						if(env != cEnv) {
+							env.setLoadFreshWorld(env.loadFreshWorld() ? false : true);
+							env.openSettingsInventory(p);
+						} else {
+							p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
+							p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+						}
 						return;
 					}
 					p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
@@ -250,25 +242,30 @@ public class Actions implements Listener {
 				}
 				if(inv.getName().equals(env.getMPInventory(1).getName())) {
 					e.setCancelled(true);
-					if(is.isSimilar(SpecialItem.BACK.getItem())) {
+					if(is.isSimilar(StaticItem.BACK.getItem())) {
 						env.openSubInventory(p);
 						return;
 					}
-					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.NEXT_ICON.setLores(null).getItem())) {
+					if(StaticItem.cleanLores(is.clone()).isSimilar(StaticItem.NEXT_ICON.setLores(null).getItem())) {
 						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
 						env.openMPInventory(p, page);
 						return;
 					}
-					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.PREVIOUS_ICON.setLores(null).getItem())) {
+					if(StaticItem.cleanLores(is.clone()).isSimilar(StaticItem.PREVIOUS_ICON.setLores(null).getItem())) {
 						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
 						env.openMPInventory(p, page);
 						return;
 					}
 					for(File f : Environment.getAllFiles(false, false)) {
 						if(is.isSimilar(env.getMPItem(f))) {
-							if(env.getPluginNames().contains(f.getName())) env.removePlugin(f);
-							else env.addPlugin(f);
-							env.openMPInventory(p, 1);
+							if(env != cEnv) {
+								if(env.getPluginNames().contains(f.getName())) env.removePlugin(f);
+								else env.addPlugin(f);
+								env.openMPInventory(p, 1);
+							} else {
+								p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
+								p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
+							}
 							return;
 						}
 					}
@@ -277,35 +274,40 @@ public class Actions implements Listener {
 				}
 				if(inv.getName().equals(env.getMWInventory(1).getName())) {
 					e.setCancelled(true);
-					if(is.isSimilar(SpecialItem.BACK.getItem())) {
+					if(is.isSimilar(StaticItem.BACK.getItem())) {
 						env.openSubInventory(p);
 						return;
 					}
-					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.NEXT_ICON.setLores(null).getItem())) {
+					if(StaticItem.cleanLores(is.clone()).isSimilar(StaticItem.NEXT_ICON.setLores(null).getItem())) {
 						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
 						env.openMWInventory(p, page);
 						return;
 					}
-					if(SpecialItem.cleanLores(is.clone()).isSimilar(SpecialItem.PREVIOUS_ICON.setLores(null).getItem())) {
+					if(StaticItem.cleanLores(is.clone()).isSimilar(StaticItem.PREVIOUS_ICON.setLores(null).getItem())) {
 						int page = Integer.parseInt(is.getItemMeta().getLore().get(0).replaceFirst(ChatColor.GRAY + "Turn to page ", ""));
 						env.openMWInventory(p, page);
 						return;
 					}
 					for(File f : Environment.getAllFiles(false, true)) {
 						if(is.isSimilar(env.getMWItem(f))) {
-							for(EWorld ew : env.getWorlds()) {
-								if(ew.getName().equals(f.getName())) {
-									env.removeWorld(ew);
-									env.openMWInventory(p, 1);
-									return;
+							if(env != cEnv) {
+								for(EWorld ew : env.getWorlds()) {
+									if(ew.getName().equals(f.getName())) {
+										env.removeWorld(ew);
+										env.openMWInventory(p, 1);
+										return;
+									}
 								}
+								Object[] transfer = new Object[]{env, new EWorld(f.getName(), null)};
+								Environment.settingWorld.put(p.getName(), transfer);
+								
+								p.closeInventory();
+								p.sendMessage(Message.INFO.getMessage("Please type this world's copy name."));
+								p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
+							} else {
+								p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
+								p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 							}
-							Object[] transfer = new Object[]{env, new EWorld(f.getName(), null)};
-							Environment.settingWorld.put(p.getName(), transfer);
-							
-							p.closeInventory();
-							p.sendMessage(Message.INFO.getMessage("Please type this world's copy name."));
-							p.playSound(p.getLocation(), Sound.BLOCK_WOOD_BUTTON_CLICK_ON, 1F, 1F);
 							return;
 						}
 					}
@@ -313,7 +315,7 @@ public class Actions implements Listener {
 					return;
 				}
 				if(inv.getName().equals(env.getIconInventory().getName())) {
-					if(is.isSimilar(SpecialItem.PLACE_HOLDER.getItem())) {
+					if(is.isSimilar(StaticItem.PLACE_HOLDER.getItem())) {
 						e.setCancelled(true);
 						p.playSound(p.getLocation(), Sound.BLOCK_NOTE_BASS, 2F, 1F);
 						return;
