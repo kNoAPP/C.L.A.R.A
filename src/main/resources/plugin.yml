@@ -1,10 +1,6 @@
 name: Clara
 main: com.kNoAPP.Clara.Clara
-version: 1.2.4
+version: 1.2.6
 commands:
     clara:
         description: Clara Manager
-    world:
-        description: Access a World
-    stay:
-        description: Opt-out of Restoration
