@@ -22,8 +22,11 @@ public class CmdManager implements CommandExecutor {
 				if(args.length == 0) {
 					p.sendMessage(Message.INFO.getMessage("Code Loading and Routine Analysis - By kNoAPP"));
 					p.sendMessage(ChatColor.DARK_GREEN + "----------");
-					p.sendMessage(Message.HELP.getMessage("/clara guitool"));
-					p.sendMessage(Message.HELP.getMessage("/clara disable"));
+					p.sendMessage(Message.HELP.getMessage("/clara - Show help"));
+					if(p.hasPermission("clara.guitool")) p.sendMessage(Message.HELP.getMessage("/clara guitool - Open the setup GUI"));
+					if(p.hasPermission("clara.disable")) p.sendMessage(Message.HELP.getMessage("/clara disable - Disable the plugin"));
+					if(p.hasPermission("clara.stay")) p.sendMessage(Message.HELP.getMessage("/clara stay - Stay on this server"));
+					if(p.hasPermission("clara.world")) p.sendMessage(Message.HELP.getMessage("/clara world [world] - Change worlds"));
 					return true;
 				}
 				if(args.length == 1) {
@@ -31,36 +34,33 @@ public class CmdManager implements CommandExecutor {
 						if(p.hasPermission("clara.guitool")) {
 							Environment.openMainInventory(p, 1);
 							return true;
-						} else {
-							p.sendMessage(Message.MISSING.getMessage("clara.guitool"));
-							return false;
-						}
+						} else p.sendMessage(Message.MISSING.getMessage("clara.guitool"));
 					}
 					if(args[0].equalsIgnoreCase("disable")) {
 						if(p.hasPermission("clara.disable")) {
 							p.sendMessage(ChatColor.GREEN + "Clara is being disabled...");
 							p.sendMessage(ChatColor.GRAY + "You may now safely edit configuration files.");
 							Clara.getPlugin().getPluginLoader().disablePlugin(Clara.getPlugin());
-						} else {
-							p.sendMessage(Message.MISSING.getMessage("clara.disable"));
-							return false;
-						}
+							return true;
+						} else p.sendMessage(Message.MISSING.getMessage("clara.disable"));
+					}
+					if(args[0].equalsIgnoreCase("stay")) {
+						if(p.hasPermission("clara.stay")) {
+							if(Actions.restore.contains(p.getUniqueId())) {
+								Actions.restore.remove(p.getUniqueId());
+								p.sendMessage(Message.INFO.getMessage("You have opt-ed out of sever restoration!"));
+								return true;
+							} else p.sendMessage(Message.INFO.getMessage("You are not being restored to a server!"));
+						} else p.sendMessage(Message.MISSING.getMessage("clara.stay"));
 					}
 				}
-			}
-			if(cmd.getName().equalsIgnoreCase("stay")) {
-				if(p.hasPermission("clara.stay")) {
-					if(Actions.restore.contains(p.getUniqueId())) {
-						Actions.restore.remove(p.getUniqueId());
-						p.sendMessage(Message.INFO.getMessage("You have opt-ed out of sever restoration!"));
-					} else p.sendMessage(Message.INFO.getMessage("You are not being restored to a server!"));
-				} else p.sendMessage(Message.MISSING.getMessage("clara.stay"));
-			}
-			if(cmd.getName().equalsIgnoreCase("world")) {
-				if(args.length == 1) {
-					if(p.hasPermission("clara.world")) {
-						World w = Bukkit.getWorld(args[0]);
-						if(w != null) p.teleport(w.getSpawnLocation());
+				if(args.length == 2) {
+					if(args[0].equalsIgnoreCase("world")) {
+						if(p.hasPermission("clara.world")) {
+							World w = Bukkit.getWorld(args[1]);
+							if(w != null) p.teleport(w.getSpawnLocation());
+							return true;
+						} else p.sendMessage(Message.MISSING.getMessage("clara.world"));
 					}
 				}
 			}

@@ -30,20 +30,6 @@ public class SpecialItem {
 				new String[]{ChatColor.GRAY + "Add/Remove plugins to this setup"}, null, null),
 		MANAGE_WORLDS(ChatColor.GOLD + "Manage Worlds", 1, (byte)0, Material.BOOK,
 				new String[]{ChatColor.GRAY + "Add/remove worlds to this setup"}, null, null),
-		/*
-		START_SERVER(ChatColor.GREEN + "Start Server", 1, (byte)0, Material.EMERALD_BLOCK,
-				new String[]{ChatColor.GRAY + "Start this server setup"}, null, null),
-		START_SERVER_RR(ChatColor.GREEN + "Start Server", 1, (byte)0, Material.EMERALD_BLOCK,
-				new String[]{ChatColor.GRAY + "Start this server setup", ChatColor.RED + "The server will restart."}, null, null),
-		QUEUE_SERVER(ChatColor.YELLOW + "Queue Server", 1, (byte)0, Material.GOLD_BLOCK,
-				new String[]{ChatColor.GRAY + "Because you have an active setup loaded,", ChatColor.GRAY + "it may take longer to start this one."}, null, null),
-		QUEUE_SERVER_RR(ChatColor.YELLOW + "Queue Server", 1, (byte)0, Material.GOLD_BLOCK,
-				new String[]{ChatColor.GRAY + "Because you have an active setup loaded,", ChatColor.GRAY + "it may take longer to start this one.", ChatColor.RED + "The server will restart."}, null, null),
-		STOP_SERVER(ChatColor.RED + "Stop Server", 1, (byte)0, Material.REDSTONE_BLOCK,
-				new String[]{ChatColor.GRAY + "Stop this server setup"}, null, null),
-		STOP_SERVER_RR(ChatColor.RED + "Stop Server", 1, (byte)0, Material.REDSTONE_BLOCK,
-				new String[]{ChatColor.GRAY + "Stop this server setup", ChatColor.RED + "The server will restart."}, null, null),
-		*/
 		CHANGE_NAME(ChatColor.DARK_PURPLE + "Change Name", 1, (byte)0, Material.BOOK_AND_QUILL,
 				new String[]{ChatColor.GRAY + "Change this setup's name"}, null, null),
 		CHANGE_ICON(ChatColor.AQUA + "Change Icon", 1, (byte)0, Material.EYE_OF_ENDER,
@@ -54,27 +40,6 @@ public class SpecialItem {
 				null, null, null),
 		PREVIOUS_ICON(ChatColor.RED + "Previous Page", 1, (byte)14, Material.CARPET,
 				null, null, null);
-		
-		/*
-		FORCE_RESTART_FALSE(ChatColor.RED + "Restart Server", 1, (byte)0, Material.APPLE,
-				new String[]{ChatColor.GRAY + "Restart on load/unload", ChatColor.RED + "Forcefully enabled if the setup",
-						ChatColor.RED + "contains world copy names:", ChatColor.DARK_RED + "world, world_nether, world_the_end"}, null, null),
-		FORCE_RESTART_TRUE(ChatColor.RED + "Restart Server", 1, (byte)0, Material.APPLE,
-				new String[]{ChatColor.GREEN + "Selected!", ChatColor.GRAY + "Restart on load/unload", 
-						ChatColor.RED + "Forcefully enabled if the setup", ChatColor.RED + "contains world copy names:", 
-						ChatColor.DARK_RED + "world, world_nether, world_the_end"},
-				new Enchantment[]{Enchantment.ARROW_INFINITE}, new ItemFlag[]{ItemFlag.HIDE_ENCHANTS}),
-		SAVE_WORLD_FALSE(ChatColor.DARK_GREEN + "Save World on Disable", 1, (byte)0, Material.COMMAND,
-				new String[]{ChatColor.GRAY + "Save world(s) to database on unload"}, null, null),
-		SAVE_WORLD_TRUE(ChatColor.DARK_GREEN + "Save World on Disable", 1, (byte)0, Material.COMMAND,
-				new String[]{ChatColor.GREEN + "Selected!", ChatColor.GRAY + "Save world(s) to database on unload"},
-				new Enchantment[]{Enchantment.ARROW_INFINITE}, new ItemFlag[]{ItemFlag.HIDE_ENCHANTS}),
-		LOAD_WORLD_FALSE(ChatColor.AQUA + "Load World on Enable", 1, (byte)0, Material.EMPTY_MAP,
-				new String[]{ChatColor.GRAY + "Load fresh world on server startup"}, null, null),
-		LOAD_WORLD_TRUE(ChatColor.AQUA + "Load World on Enable", 1, (byte)0, Material.EMPTY_MAP,
-				new String[]{ChatColor.GREEN + "Selected!", ChatColor.GRAY + "Load fresh world on server startup"}, 
-				new Enchantment[]{Enchantment.ARROW_INFINITE}, new ItemFlag[]{ItemFlag.HIDE_ENCHANTS});
-		*/
 		
 		private String name;
 		private int count;
