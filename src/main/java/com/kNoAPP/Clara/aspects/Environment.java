@@ -8,7 +8,6 @@ import java.util.List;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
-import org.bukkit.Chunk;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
@@ -355,7 +354,7 @@ public class Environment {
 		
 		new BukkitRunnable() {
 			public void run() {
-				for(Player pl : Bukkit.getOnlinePlayers()) pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!")); //Kick anyone who didn't make it off.
+				if(forceRestart()) for(Player pl : Bukkit.getOnlinePlayers()) pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!")); //Kick anyone who didn't make it off.
 				Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Saving Worlds...");
 				Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "save-all");
 			}
@@ -431,9 +430,9 @@ public class Environment {
 			
 			World fall = Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback"));
 			if(w != null && fall != null) for(Player pl : w.getPlayers()) if(pl != null) pl.teleport(fall.getSpawnLocation());
-			for(Chunk c : w.getLoadedChunks()) c.unload();
 			
-			if(!Bukkit.unloadWorld(w.getName(), false)) Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] " + w.getName() + " may have failed to unload correctly!");
+			if(!Bukkit.unloadWorld(w.getName(), false)) Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[" + Clara.getPlugin().getName() + "] " + 
+					ChatColor.GOLD + w.getName() + ChatColor.YELLOW + " may have failed to unload correctly!");
 			
 			FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
 			List<String> used = fc.getStringList("UsedWorlds");
