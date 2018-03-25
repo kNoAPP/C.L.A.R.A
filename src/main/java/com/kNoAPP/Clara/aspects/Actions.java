@@ -56,7 +56,7 @@ public class Actions implements Listener {
 	private void restorePlayer(Player p, Server s) {
 		restore.add(p.getUniqueId());
 		p.sendMessage(Message.INFO.getMessage("Attempting to reconnect you to " + s.getName() + "."));
-		p.sendMessage(Message.INFO.getMessage("You may opt out at any time with /stay."));
+		p.sendMessage(Message.INFO.getMessage("You may opt out at any time with /clara stay."));
 		
 		new BukkitRunnable() {
 			int i = 181; 
