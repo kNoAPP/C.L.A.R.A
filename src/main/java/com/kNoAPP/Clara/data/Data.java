@@ -70,7 +70,7 @@ public enum Data {
 			}
 			if(this == MAIN) {
 				fc.set("Version", "1.0.0");
-				fc.set("Enable.MySQL_Bungee", true);
+				fc.set("Enable.MySQL_Bungee", false);
 				fc.set("MySQL.host", "localhost");
 				fc.set("MySQL.port", 3306);
 				fc.set("MySQL.database", "ExampleDB");

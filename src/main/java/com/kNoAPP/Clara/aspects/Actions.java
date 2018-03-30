@@ -360,7 +360,7 @@ public class Actions implements Listener {
 		Environment.changingName.remove(p.getName());
 		Environment.settingWorld.remove(p.getName());
 		
-		Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
+		Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size()-1);
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
