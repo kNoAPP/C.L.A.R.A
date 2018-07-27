@@ -136,6 +136,7 @@ public class SpecialItem {
 			return inv;
 		}
 		
+		@SuppressWarnings("deprecation")
 		public ItemStack getItem() {
 			ItemStack is = new ItemStack(m, count, data);
 			ItemMeta im = is.getItemMeta();
@@ -175,6 +176,7 @@ public class SpecialItem {
 			return is;
 		}
 		
+		@SuppressWarnings("deprecation")
 		public static ItemStack unbreakable(ItemStack is) {
 			ItemMeta im = is.getItemMeta();
 			im.spigot().setUnbreakable(true);
