@@ -54,10 +54,14 @@ public class CmdManager implements CommandExecutor {
 						} else p.sendMessage(Message.MISSING.getMessage("clara.stay"));
 					}
 				}
-				if(args.length == 2) {
+				if(args.length >= 2) {
 					if(args[0].equalsIgnoreCase("world")) {
 						if(p.hasPermission("clara.world")) {
-							World w = Bukkit.getWorld(args[1]);
+							String name = "";
+							for(int i=1; i<args.length; i++) name += " " + args[i];
+							name = name.replaceFirst(" ", "");
+							
+							World w = Bukkit.getWorld(name);
 							if(w != null) p.teleport(w.getSpawnLocation());
 							return true;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.world"));
