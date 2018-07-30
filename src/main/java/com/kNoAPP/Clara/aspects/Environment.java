@@ -100,13 +100,13 @@ public class Environment {
 	
 	public boolean forceRestart() {
 		for(EWorld ew : worlds) if(ew.getCopiedName().equalsIgnoreCase("world") || ew.getCopiedName().equalsIgnoreCase("world_nether") || ew.getCopiedName().equalsIgnoreCase("world_the_end") 
-				|| Data.ENVIRONMENT.getFileConfig().getStringList("UsedWorlds").contains(ew.getCopiedName())) return true;
+				|| Data.ENVIRONMENT.getCachedYML().getStringList("UsedWorlds").contains(ew.getCopiedName())) return true;
 		return forceRestart;
 	}
 	
 	public boolean forceRestart(boolean addCheck) {
 		for(EWorld ew : worlds) if(ew.getCopiedName().equalsIgnoreCase("world") || ew.getCopiedName().equalsIgnoreCase("world_nether") || ew.getCopiedName().equalsIgnoreCase("world_the_end") 
-				|| (Data.ENVIRONMENT.getFileConfig().getStringList("UsedWorlds").contains(ew.getCopiedName()) && addCheck)) return true;
+				|| (Data.ENVIRONMENT.getCachedYML().getStringList("UsedWorlds").contains(ew.getCopiedName()) && addCheck)) return true;
 		return forceRestart;
 	}
 	
@@ -183,7 +183,7 @@ public class Environment {
 		List<String> pluginFiles = new ArrayList<String>();
 		File source;
 		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
-		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		else source = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"));
 		File[] targets = source.listFiles();
 		
 		for(String s : pluginNames) {
@@ -201,7 +201,7 @@ public class Environment {
 		List<EWorld> worldFiles = new ArrayList<EWorld>();
 		File source;
 		if(local) source = Bukkit.getWorldContainer();
-		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		else source = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"));
 		File[] targets = source.listFiles();
 		
 		for(EWorld ew : worlds) {
@@ -223,7 +223,7 @@ public class Environment {
 		List<File> pluginFiles = new ArrayList<File>();
 		File source;
 		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
-		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		else source = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"));
 		File[] targets = source.listFiles();
 		
 		for(File target : targets) if(pluginNames.contains(target.getName()) && target.isFile()) pluginFiles.add(target);
@@ -234,7 +234,7 @@ public class Environment {
 		List<File> worldFiles = new ArrayList<File>();
 		File source;
 		if(local) source = Bukkit.getWorldContainer();
-		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		else source = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"));
 		File[] targets = source.listFiles();
 		
 		for(File target : targets) {
@@ -281,7 +281,7 @@ public class Environment {
 	public void load() {
 		if(getThisEnvironment() != null) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[" + Clara.getPlugin().getName() + "] Environment [" + getName() + "] has been queued for loading!");
-			FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+			FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
 			fc.set("Queued", getID());
 			getThisEnvironment().unload();
 			return;
@@ -313,10 +313,10 @@ public class Environment {
 		loadPlugins();
 		loadWorlds();
 		
-		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+		FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
 		fc.set("Active", getID());
 		if(fc.getInt("Queued") == getID()) fc.set("Queued", 0); //Removes Queue
-		Data.ENVIRONMENT.saveDataFile(fc);
+		Data.ENVIRONMENT.saveYML(fc);
 		
 		new BukkitRunnable() {
 			public void run() {
@@ -366,9 +366,9 @@ public class Environment {
 				unloadPlugins();
 				unloadWorlds();
 				
-				FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+				FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
 				fc.set("Active", 0);
-				Data.ENVIRONMENT.saveDataFile(fc);
+				Data.ENVIRONMENT.saveYML(fc);
 			}
 		}.runTaskLater(Clara.getPlugin(), unload);
 		
@@ -419,7 +419,7 @@ public class Environment {
 			World w = Bukkit.getWorld(f.getName());
 			if(saveWorld) {
 				EWorld ew = getEWorld(f.getName(), true);
-				File d = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"), ew.getName());
+				File d = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"), ew.getName());
 				
 				try{FileUtils.deleteDirectory(d);}
 				catch(Exception ex) {Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Failed to delete a world from the Database!");}
@@ -428,17 +428,17 @@ public class Environment {
 				catch(Exception ex) {Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + Clara.getPlugin().getName() + "] Failed to save a world to the Database!");}
 			}
 			
-			World fall = Bukkit.getWorld(Data.ENVIRONMENT.getFileConfig().getString("Fallback"));
+			World fall = Bukkit.getWorld(Data.ENVIRONMENT.getCachedYML().getString("Fallback"));
 			if(w != null && fall != null) for(Player pl : w.getPlayers()) if(pl != null) pl.teleport(fall.getSpawnLocation());
 			
 			if(!Bukkit.unloadWorld(w.getName(), false)) Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[" + Clara.getPlugin().getName() + "] " + 
 					ChatColor.GOLD + w.getName() + ChatColor.YELLOW + " may have failed to unload correctly!");
 			
-			FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+			FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
 			List<String> used = fc.getStringList("UsedWorlds");
 			used.add(w.getName());
 			fc.set("UsedWorlds", used);
-			Data.ENVIRONMENT.saveDataFile(fc);
+			Data.ENVIRONMENT.saveYML(fc);
 			
 			//new BukkitRunnable() {
 			//	public void run() {
@@ -601,7 +601,7 @@ public class Environment {
 	public static File[] getAllFiles(boolean local) {
 		File source;
 		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
-		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		else source = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"));
 		return source.listFiles();
 	}
 	
@@ -613,7 +613,7 @@ public class Environment {
 	public static List<File> getAllFiles(boolean local, boolean directory) {
 		File source;
 		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
-		else source = new File(Data.ENVIRONMENT.getFileConfig().getString("Database"));
+		else source = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"));
 		
 		List<File> files = new ArrayList<File>();
 		for(File f : source.listFiles()) if(f.isDirectory() == directory) files.add(f);
@@ -621,7 +621,7 @@ public class Environment {
 	}
 	
 	public static void importEnvironments() {
-		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+		FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
 		if(fc.getConfigurationSection("Environment") != null) { //New plugins will trigger this check.
 			for(String name : fc.getConfigurationSection("Environment").getKeys(false)) {
 				int id = fc.getInt("Environment." + name + ".id");
@@ -643,7 +643,7 @@ public class Environment {
 	}
 	
 	public static void exportEnvironments() {
-		FileConfiguration fc = Data.ENVIRONMENT.getFileConfig();
+		FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
 		fc.set("Environment", null);
 		for(Environment e : environments) {
 			fc.set("Environment." + e.getName() + ".id", e.getID());
@@ -655,7 +655,7 @@ public class Environment {
 			fc.set("Environment." + e.getName() + ".settings.LFW", e.loadFreshWorld());
 			fc.set("Environment." + e.getName() + ".settings.SW", e.saveWorld());
 		}
-		Data.ENVIRONMENT.saveDataFile(fc);
+		Data.ENVIRONMENT.saveYML(fc);
 	}
 	
 	public static Environment getEnvironment(String name) {
@@ -669,11 +669,11 @@ public class Environment {
 	}
 	
 	public static Environment getThisEnvironment() {
-		return getEnvironment(Data.ENVIRONMENT.getFileConfig().getInt("Active"));
+		return getEnvironment(Data.ENVIRONMENT.getCachedYML().getInt("Active"));
 	}
 	
 	public static Environment getQueuedEnvironment() {
-		return getEnvironment(Data.ENVIRONMENT.getFileConfig().getInt("Queued"));
+		return getEnvironment(Data.ENVIRONMENT.getCachedYML().getInt("Queued"));
 	}
 	
 	public static Inventory getMainInventory(int page) {

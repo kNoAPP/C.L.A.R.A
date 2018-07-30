@@ -40,7 +40,7 @@ public class Actions implements Listener {
 	@EventHandler
 	public void onBungee(BungeeReceivedEvent e) {
 		if(e.getChannel().equals("restore")) {
-			FileConfiguration fc = Data.MAIN.getFileConfig();
+			FileConfiguration fc = Data.MAIN.getCachedYML();
 			if(fc.getBoolean("RestorePlayersToServers") && fc.getBoolean("Enable.MySQL_Bungee")) {
 				new BukkitRunnable() {
 					public void run() {
@@ -350,7 +350,7 @@ public class Actions implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
+		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
 	}
 	
 	@EventHandler
@@ -360,7 +360,7 @@ public class Actions implements Listener {
 		Environment.changingName.remove(p.getName());
 		Environment.settingWorld.remove(p.getName());
 		
-		Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size()-1);
+		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size()-1);
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
@@ -413,7 +413,7 @@ public class Actions implements Listener {
 			if(e.getMessage().equalsIgnoreCase("/stop")) {
 				e.setCancelled(true);
 				
-				if(Data.MAIN.getFileConfig().getBoolean("Enable.MySQL_Bungee")) {
+				if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
 					Server transfer = Server.transferServer(Server.getThisServer());
 					for(Player pl : Bukkit.getOnlinePlayers()) {
 						if(transfer != null) {
@@ -421,7 +421,7 @@ public class Actions implements Listener {
 							pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
 							BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
 							BungeeAPI.connect(pl, transfer.getName());
-						}
+						} else pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!"));
 					}
 					new BukkitRunnable() {
 						public void run() {

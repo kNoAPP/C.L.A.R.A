@@ -1,100 +1,130 @@
 package com.kNoAPP.Clara.data;
 
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
 
 import com.kNoAPP.Clara.Clara;
 
-public enum Data {
+public abstract class Data {
 	
-	CONFIG(new File(Clara.getPlugin().getDataFolder(), "config.yml"), "config.yml"),
-	MAIN(null, "main.yml"),
-	ENVIRONMENT(null, "environment.yml");
+	public static YML MAIN = new YML("/main.yml");
+	public static YML ENVIRONMENT = new YML("/environment.yml");
 	
-	private File file;
-	private FileConfiguration fc;
-	private String fileName;
+	protected String innerPath, outerPath;
+	protected File file;
 	
-	private Data(File file, String fileName) {
-		this.file = file;
-		this.fc = new YamlConfiguration();
-		this.fileName = fileName;
+	public Data(String innerPath) {
+		this.innerPath = innerPath;
+		this.file = new File(Clara.getPlugin().getDataFolder(), innerPath);
+		this.outerPath = file.getAbsolutePath();
+		
+		if(!file.exists()) {
+			Clara.getPlugin().getLogger().info(this.innerPath + " not found. Creating...");
+			try {
+				file.getParentFile().mkdirs();
+				exportResource();
+			} catch (Exception e) { e.printStackTrace(); }
+		} else Clara.getPlugin().getLogger().info(this.innerPath + " found. Loading...");
 	}
 	
 	public File getFile() {
 		return file;
 	}
 	
-	public void setFile(String path) {
-		if(path == "") this.file = new File(Clara.getPlugin().getDataFolder(), this.getFileName());
-		else this.file = new File(path, this.getFileName());
-	}
-	
-	public FileConfiguration getFileConfig() {
-		return fc;
-	}
-	
-	public void saveDataFile(FileConfiguration fc) {
-		this.fc = fc;
-	}
-	
-	public void logDataFile() {
+	/**
+	 * Export a resource embedded into a Jar file to the local file path.
+	 *
+	 * @param resourcePath
+	 *            ie.: "SmartLibrary.dll"
+	 *            ie.: "data/SmartLibrary.dll"
+	 * @throws Exception
+	 */
+	private void exportResource() throws Exception {
+		InputStream stream = null;
+		OutputStream resStreamOut = null;
+
 		try {
-			this.fc.save(this.getFile());
-		} catch (IOException e) {}
+			stream = Data.class.getResourceAsStream(innerPath);
+			if(stream == null) throw new Exception("Cannot get resource \"" + innerPath + "\" from Jar file.");
+
+			int readBytes;
+			byte[] buffer = new byte[4096];
+			resStreamOut = new FileOutputStream(outerPath);
+			while((readBytes = stream.read(buffer)) > 0) resStreamOut.write(buffer, 0, readBytes);
+		} catch (Exception ex) { 
+			throw ex;
+		} finally {
+			stream.close();
+			resStreamOut.close();
+		}
 	}
 	
-	public String getFileName() {
-		return fileName;
-	}
-	
-	public String getPath() {
-		return this.getFile().getAbsolutePath();
-	}
-	
-	public void createDataFile() {
-		if(!this.getFile().exists()) {
-			Clara.getPlugin().getLogger().info(this.getFileName() + " not found. Creating...");
+	public static class YML extends Data {
+
+		private FileConfiguration cached;
+		
+		public YML(String innerPath) {
+			super(innerPath);
+		}
+		
+		public FileConfiguration getYML() {
+			cached = new YamlConfiguration();
 			try {
-				this.getFile().createNewFile();
-			} catch (Exception e) {}
-			FileConfiguration fc = this.fc;
-			if(this == CONFIG) {
-				fc.set("Version", "1.0.0");
-				fc.set("UseMainFolder", true);
-				fc.set("UseCustomFolder", "/example/path/");
-			}
-			if(this == MAIN) {
-				fc.set("Version", "1.0.0");
-				fc.set("Enable.MySQL_Bungee", false);
-				fc.set("MySQL.host", "localhost");
-				fc.set("MySQL.port", 3306);
-				fc.set("MySQL.database", "ExampleDB");
-				fc.set("MySQL.username", "root");
-				fc.set("MySQL.password", "psswd");
-				fc.set("Bungee.path", "/example/path/");
-				fc.set("RestorePlayersToServers", true);
-			}
-			if(this == ENVIRONMENT) {
-				fc.set("Version", "1.0.0");
-				File f = new File(Clara.getPlugin().getDataFolder().getAbsolutePath() + "/Database");
-				f.mkdirs();
-				fc.set("Database", f.getAbsolutePath());
-				fc.set("Fallback", "world");
-				fc.set("Active", 0);
-				fc.set("Queued", 0);
-				fc.set("UsedWorlds", new ArrayList<String>());
-			}
-			this.saveDataFile(fc);
-			this.logDataFile();
-        }
+				cached.load(file);
+			} catch (Exception e) { e.printStackTrace(); }
+			
+			return cached;
+		}
+		
+		public FileConfiguration getCachedYML() {
+			if(cached == null) return getYML();
+			return cached;
+		}
+		
+		public void saveYML(FileConfiguration fc) {
+			try {
+				fc.save(file);
+				cached = fc;
+			} catch (IOException e) { e.printStackTrace(); }
+		}
+	}
 	
-		try {
-			this.fc.load(this.getFile());
-		} catch (Exception e) {}
+	public static class JSON extends Data {
+		
+		private JSONObject cached;
+		
+		public JSON(String innerPath) {
+			super(innerPath);
+		}
+		
+		public JSONObject getJSON() {
+			JSONParser parser = new JSONParser();
+			try {
+				cached = (JSONObject) parser.parse(new FileReader(outerPath));
+				return cached;
+			} catch (Exception e) { e.printStackTrace(); }
+			return null;
+		}
+		
+		public JSONObject getCachedJSON() {
+			if(cached == null) return getJSON();
+			return cached;
+		}
+		
+		public void saveJSON(JSONObject obj) {
+			try(FileWriter fw = new FileWriter(outerPath)) {
+				fw.write(obj.toJSONString());
+			} catch (IOException e) { e.printStackTrace(); }
+		}
 	}
 }

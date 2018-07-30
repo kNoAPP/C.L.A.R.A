@@ -1,0 +1,27 @@
+# [Version] Configuration version, ignore unless you like breaking things.
+
+# [Enable] [MySQL_Bungee] Enabling MySQL_Bungee will unlock a lot of hidden stuff in Clara.
+# Clara will be able to keep track of which servers are online and
+# will move players off a closing server. However, both MySQL and
+# Bungee are required to use this.
+
+# [MySQL] Enter your MySQL details here.
+
+# [Bungee] Provide a path to your Bungee config.yml file.
+# Example: /home/Bungee/config.yml
+
+# [RestorePlayersToServers] Only relavent on servers using MySQL_Bungee. Should Clara bring
+# players who were kicked off another server back if the server comes
+# back online?
+Version: 1.0.0
+Enable:
+  MySQL_Bungee: false
+MySQL:
+  host: localhost
+  port: 3306
+  database: ExampleDB
+  username: root
+  password: psswd
+Bungee:
+  path: /example/path/
+RestorePlayersToServers: true
