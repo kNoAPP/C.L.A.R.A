@@ -1,8 +1,11 @@
 package com.kNoAPP.Clara.commands;
 
+import java.io.File;
+
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.World;
+import org.bukkit.WorldCreator;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -57,8 +60,15 @@ public class CmdManager implements CommandExecutor {
 				if(args.length == 2) {
 					if(args[0].equalsIgnoreCase("world")) {
 						if(p.hasPermission("clara.world")) {
-							World w = Bukkit.getWorld(args[1]);
-							if(w != null) p.teleport(w.getSpawnLocation());
+							File f = new File(Bukkit.getWorldContainer(), args[1]);
+							if(f.exists()) {
+								World w = Bukkit.getWorld(args[1]);
+								if(w == null) {
+									WorldCreator creator = new WorldCreator(args[1]);
+									w = creator.createWorld();
+								}
+								p.teleport(w.getSpawnLocation());
+							} else p.sendMessage(Message.WARN.getMessage("That world does not exist!"));
 							return true;
 						} else p.sendMessage(Message.MISSING.getMessage("clara.world"));
 					}
