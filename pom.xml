@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.kNoAPP</groupId>
 	<artifactId>Clara</artifactId>
-	<version>1.2.7</version>
+	<version>1.13</version>
 	<name>Clara</name>
 	<description>Code loading and routine analysis</description>
 	<properties> 
@@ -20,8 +20,8 @@
 		<!--Spigot API and NMS -->
 		<dependency>
             <groupId>org.spigotmc</groupId>
-            <artifactId>spigot</artifactId>
-            <version>1.12.2-R0.1-SNAPSHOT</version>
+            <artifactId>spigot-api</artifactId>
+            <version>1.13-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
     	</dependency>
 		<dependency>

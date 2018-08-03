@@ -56,40 +56,6 @@ public class Tools {
         return blocks;
     }
     
-    public static Material generateDisc(int a) {
-		if(a % 10 == 0) {
-			return Material.GREEN_RECORD;
-		}
-		if(a % 10 == 1) {
-			return Material.GOLD_RECORD;
-		}
-		if(a % 10 == 2) {
-			return Material.RECORD_10;
-		}
-		if(a % 10 == 3) {
-			return Material.RECORD_9;
-		}
-		if(a % 10 == 4) {
-			return Material.RECORD_8;
-		}
-		if(a % 10 == 5) {
-			return Material.RECORD_7;
-		}
-		if(a % 10 == 6) {
-			return Material.RECORD_6;
-		}
-		if(a % 10 == 7) {
-			return Material.RECORD_5;
-		}
-		if(a % 10 == 8) {
-			return Material.RECORD_4;
-		}
-		if(a % 10 == 9) {
-			return Material.RECORD_3;
-		}
-		return null;
-	}
-    
     public static void broadcastSound(Sound s, Float v, Float p) {
     	for(Player pl : Bukkit.getOnlinePlayers()) {
     		pl.playSound(pl.getLocation(), s, v, p);

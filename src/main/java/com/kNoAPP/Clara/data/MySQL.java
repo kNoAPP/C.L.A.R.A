@@ -27,7 +27,7 @@ public class MySQL {
 	}
 	
 	public static boolean loadConnection() {
-		FileConfiguration fc = Data.MAIN.getFileConfig();
+		FileConfiguration fc = Data.MAIN.getCachedYML();
 		host = fc.getString("MySQL.host");
 		port = fc.getInt("MySQL.port");
 		database = fc.getString("MySQL.database");
@@ -57,9 +57,7 @@ public class MySQL {
 	}
 	
 	private static void openConnection() throws SQLException, ClassNotFoundException {
-		if(connection != null && !connection.isClosed()) {
-			return;
-		}
+		if(connection != null && !connection.isClosed()) return;
 		
 		Class.forName("com.mysql.jdbc.Driver");
 		connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database + "?autoReconnect=true&useSSL=false", username, password);
@@ -67,22 +65,22 @@ public class MySQL {
 		//This is a keep-alive
 		new BukkitRunnable() {
 			public void run() {
-				MySQL.getString(Table.SERVER.getName(), "name", "name", "kpalv");
+				MySQL.getString(Table.SERVER.toString(), "name", "name", "kpalv");
 			}
 		}.runTaskTimer(Clara.getPlugin(), 6000L, 6000L);
 	}
 	
 	public static void createTables() {
 		for(Table t : Table.values()) {
-			if(!exists(t.getName())) {
+			if(!exists(t.toString())) {
 				try {
 					Statement s = connection.createStatement();
 					s.executeUpdate(t.getSetup());
 				} catch (SQLException e) {
 					e.printStackTrace();
 				}
-			} else if(t == Table.SERVER && !exists(Table.SERVER.getName(), "players"))
-				addAlter(Table.SERVER.getName(), "players", "int", "0", "online");
+			} else if(t == Table.SERVER && !exists(Table.SERVER.toString(), "players"))
+				addAlter(Table.SERVER.toString(), "players", "int", "0", "online");
 		}
 	}
 	
@@ -460,22 +458,4 @@ public class MySQL {
 		}
 		return null;
 	}
-	
-	/*
-	@SuppressWarnings("deprecation")
-	public static synchronized void loadPlayer(String s) {
-    	OfflinePlayer p = Bukkit.getOfflinePlayer(s);
-    	for(Table t : Table.values()) {
-    		if(t.getType() == Table.TYPE_PLAYER) {
-    			if(getString(t.getName(), "UUID", "UUID", p.getUniqueId().toString()) == null) {
-    				t.addPlayer(s);
-    			} else {
-    				if(!getString(t.getName(), "name", "UUID", p.getUniqueId().toString()).equals(p.getName())) {
-    					update(t.getName(), "name", p.getName(), "UUID", p.getUniqueId().toString());
-    				}
-    			}
-    		}
-    	}
-    }
-    */
 }

@@ -1,0 +1,25 @@
+# [Version] Configuration version, ignore unless you like breaking things.
+
+# [Database] Location of your Clara Database. By default, this should be
+# set within Clara's plugin folder (the one you're in). Modify this
+# value only when the server is shut off.
+
+# [Fallback] If a world is removed from the server by Clara, the fallback world
+# is the world players are moved to.
+
+# [Active] Currently active Clara build. Not recommended to change this value.
+
+# [Queued] Queued Clara build. Not recommended to change this value.
+
+# [UsedWorlds] World corruption prevention. Not recommended to change this value.
+
+# [Environment] Clara builds will appear below here. It is recommended to only modify
+# these values when the server is shut off. Of course, you could just
+# use /clara guitool like a normal person.
+Version: 1.0.0
+Database: UNKNOWN
+Fallback: world
+Active: 0
+Queued: 0
+UsedWorlds: []
+Environment:

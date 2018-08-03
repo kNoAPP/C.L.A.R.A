@@ -10,164 +10,129 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
+import com.kNoAPP.Clara.utils.Tools;
+
 
 public class SpecialItem {
 	
 	public static enum StaticItem {
 		
-		CLARA_SETUPS(ChatColor.DARK_GREEN + "Clara Setups", 1, (byte)0, Material.FEATHER, 
-				new String[]{ChatColor.GRAY + "Manage your server setups here!"}, null, null),
-		NEW_SETUP(ChatColor.GREEN + "New Setup", 1, (byte)5, Material.STAINED_GLASS_PANE,
-				new String[]{ChatColor.GRAY + "Create a new setup..."}, null, null),
-		BACK(ChatColor.GOLD + "Back", 1, (byte)0, Material.ARROW,
-				new String[]{ChatColor.GRAY + "Go back to the previous menu"}, null, null),
-		PLACE_HOLDER(ChatColor.GREEN + "<>", 1, (byte)5, Material.STAINED_GLASS_PANE,
-				null, null, null),
-		SETTINGS(ChatColor.DARK_GRAY + "Settings", 1, (byte)0, Material.SPECKLED_MELON,
-				new String[]{ChatColor.GRAY + "Manage this setup"}, null, null),
+		CLARA_SETUPS, NEW_SETUP, BACK, PLACE_HOLDER, SETTINGS,
 		
-		MANAGE_PLUGINS(ChatColor.GOLD + "Manage Plugins", 1, (byte)0, Material.ANVIL,
-				new String[]{ChatColor.GRAY + "Add/Remove plugins to this setup"}, null, null),
-		MANAGE_WORLDS(ChatColor.GOLD + "Manage Worlds", 1, (byte)0, Material.BOOK,
-				new String[]{ChatColor.GRAY + "Add/remove worlds to this setup"}, null, null),
-		CHANGE_NAME(ChatColor.DARK_PURPLE + "Change Name", 1, (byte)0, Material.BOOK_AND_QUILL,
-				new String[]{ChatColor.GRAY + "Change this setup's name"}, null, null),
-		CHANGE_ICON(ChatColor.AQUA + "Change Icon", 1, (byte)0, Material.EYE_OF_ENDER,
-				new String[]{ChatColor.GRAY + "Change this setup's icon"}, null, null),
-		DELETE_ENVIRONMENT(ChatColor.DARK_RED + "Delete Setup", 1, (byte)0, Material.BARRIER,
-				new String[]{ChatColor.GRAY + "(A really long time...)"}, null, null),
-		NEXT_ICON(ChatColor.GREEN + "Next Page", 1, (byte)5, Material.CARPET,
-				null, null, null),
-		PREVIOUS_ICON(ChatColor.RED + "Previous Page", 1, (byte)14, Material.CARPET,
-				null, null, null);
+		MANAGE_PLUGINS, MANAGE_WORLDS, CHANGE_NAME, CHANGE_ICON, DELETE_ENVIRONMENT, NEXT_ICON, PREVIOUS_ICON;
 		
-		private String name;
-		private int count;
-		private byte data;
-		private Material m;
-		private String[] lores;
-		private Enchantment[] enchants;
-		private ItemFlag[] itemFlags;
-		private boolean inv;
+		private ItemStack is;
 		
-		private StaticItem(String name, int count, byte data, Material m, String[] lores, Enchantment[] enchants, ItemFlag[] itemFlags) {
-			this(name, count, data, m, lores, enchants, itemFlags, false);
-		}
-		
-		private StaticItem(String name, int count, byte data, Material m, String[] lores, Enchantment[] enchants, ItemFlag[] itemFlags, boolean inv) {
-			this.name = name;
-			this.count = count;
-			this.data = data;
-			this.m = m;
-			this.lores = lores;
-			this.enchants = enchants;
-			this.itemFlags = itemFlags;
-			this.inv = inv;
-		}
-		
-		public String getName() {
-			return name;
-		}
-		
-		public StaticItem setName(String name) {
-			this.name = name;
-			return this;
-		}
-		
-		public int getCount() {
-			return count;
-		}
-		
-		public StaticItem setCount(int count) {
-			this.count = count;
-			return this;
-		}
-		
-		public byte getData() {
-			return data;
-		}
-		
-		public StaticItem setData(byte data) {
-			this.data = data;
-			return this;
-		}
-		
-		public Material getMaterial() {
-			return m;
-		}
-		
-		public StaticItem setMaterial(Material m) {
-			this.m = m;
-			return this;
-		}
-		
-		public String[] getLores() {
-			return lores;
-		}
-		
-		public StaticItem setLores(String[] lores) {
-			this.lores = lores;
-			return this;
-		}
-		
-		public Enchantment[] getEnchantments() {
-			return enchants;
-		}
-		
-		public StaticItem setEnchantments(Enchantment[] enchants) {
-			this.enchants = enchants;
-			return this;
-		}
-		
-		public ItemFlag[] getItemFlags() {
-			return itemFlags;
-		}
-		
-		public StaticItem setItemFlags(ItemFlag[] itemFlags) {
-			this.itemFlags = itemFlags;
-			return this;
-		}
-		
-		public boolean isInvulnerable() {
-			return inv;
-		}
-		
-		public boolean setInvulnerable() {
-			return inv;
-		}
-		
-		@SuppressWarnings("deprecation")
 		public ItemStack getItem() {
-			ItemStack is = new ItemStack(m, count, data);
-			ItemMeta im = is.getItemMeta();
-			im.setDisplayName(name);
+			if(is != null) return is;
 			
-			ArrayList<String> finalLore = new ArrayList<String>();
-			if(lores != null) for(String l : lores) finalLore.add(l);
-			im.setLore(finalLore);
-			
-			if(enchants != null) {
-				for(Enchantment e : enchants) {
-					im.addEnchant(e, 1, false);
-				}
+			ItemMeta im;
+			List<String> lores = new ArrayList<String>();
+			switch(this) {
+			case CLARA_SETUPS:
+				is = new ItemStack(Material.FEATHER);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.DARK_GREEN + "Clara Setups");
+				lores.add(ChatColor.GRAY + "Manage your server setups here!");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case NEW_SETUP:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("LIME_STAINED_GLASS_PANE"));
+				else is = new ItemStack(Material.getMaterial("STAINED_GLASS_PANE"), 1, (byte)5);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.GREEN + "New Setup");
+				lores.add(ChatColor.GRAY + "Create a new setup...");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case BACK:
+				is = new ItemStack(Material.ARROW);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.DARK_GREEN + "Clara Setups");
+				lores.add(ChatColor.GRAY + "Go back to the previous menu");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case PLACE_HOLDER:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("LIME_STAINED_GLASS_PANE"));
+				else is = new ItemStack(Material.getMaterial("STAINED_GLASS_PANE"), 1, (byte)5);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.GREEN + "<>");
+				is.setItemMeta(im);
+				return is;
+			case SETTINGS:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("GLISTERING_MELON_SLICE"));
+				else is = new ItemStack(Material.getMaterial("SPECKLED_MELON"));
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.DARK_GRAY + "Settings");
+				lores.add(ChatColor.GRAY + "Manage this setup");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case MANAGE_PLUGINS:
+				is = new ItemStack(Material.ANVIL);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.GOLD + "Manage Plugins");
+				lores.add(ChatColor.GRAY + "Add/Remove plugins to this setup");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case MANAGE_WORLDS:
+				is = new ItemStack(Material.BOOK);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.GOLD + "Manage Worlds");
+				lores.add(ChatColor.GRAY + "Add/Remove worlds to this setup");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case CHANGE_NAME:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("WRITABLE_BOOK"));
+				else is = new ItemStack(Material.getMaterial("BOOK_AND_QUILL"));
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.DARK_PURPLE + "Change Name");
+				lores.add(ChatColor.GRAY + "Change this setup's name");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case CHANGE_ICON:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("ENDER_EYE"));
+				else is = new ItemStack(Material.getMaterial("EYE_OF_ENDER"));
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.AQUA + "Change Icon");
+				lores.add(ChatColor.GRAY + "Change this setup's icon");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case DELETE_ENVIRONMENT:
+				is = new ItemStack(Material.BARRIER);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.DARK_RED + "Delete Setup");
+				lores.add(ChatColor.GRAY + "(A really long time...)");
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case NEXT_ICON:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("LIME_CARPET"));
+				else is = new ItemStack(Material.getMaterial("CARPET"), 1, (byte)5);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.GREEN + "Next Page");
+				is.setItemMeta(im);
+				return is;
+			case PREVIOUS_ICON:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("RED_CARPET"));
+				else is = new ItemStack(Material.getMaterial("CARPET"), 1, (byte)14);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.RED + "Previous Page");
+				is.setItemMeta(im);
+				return is;
+			default:
+				return null;
 			}
-			
-			if(itemFlags != null) {
-				for(ItemFlag iF : itemFlags) {
-					im.addItemFlags(iF);
-				}
-			}
-			
-			if(inv) im.spigot().setUnbreakable(true);
-			
-			is.setItemMeta(im);
-			return is;
 		}
 		
-		/*
-		 * Remember to use a clone!
-		 */
 		public static ItemStack cleanLores(ItemStack is) {
+			is = is.clone();
 			ItemMeta im = is.getItemMeta();
 			if(im != null) {
 				im.setLore(new ArrayList<String>());
@@ -175,19 +140,39 @@ public class SpecialItem {
 			}
 			return is;
 		}
-		
-		@SuppressWarnings("deprecation")
-		public static ItemStack unbreakable(ItemStack is) {
-			ItemMeta im = is.getItemMeta();
-			im.spigot().setUnbreakable(true);
-			is.setItemMeta(im);
-			return is;
-		}
 	}
 
 	public static enum DynamicItem {
 		
-		POWER, FORCE_RESTART, SAVE_WORLD, LOAD_WORLD;
+		POWER, FORCE_RESTART, SAVE_WORLD, LOAD_WORLD, NEXT_ICON, PREVIOUS_ICON;
+		
+		public ItemStack getItem(int page) {
+			ItemStack is;
+			ItemMeta im;
+			List<String> lores = new ArrayList<String>();
+			switch(this) {
+			case NEXT_ICON:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("LIME_CARPET"));
+				else is = new ItemStack(Material.getMaterial("CARPET"), 1, (byte)5);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.GREEN + "Next Page");
+				lores.add(ChatColor.GRAY + "Turn to page " + (page-1));
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			case PREVIOUS_ICON:
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("RED_CARPET"));
+				else is = new ItemStack(Material.getMaterial("CARPET"), 1, (byte)14);
+				im = is.getItemMeta();
+				im.setDisplayName(ChatColor.RED + "Previous Page");
+				lores.add(ChatColor.GRAY + "Turn to page " + (page-1));
+				im.setLore(lores);
+				is.setItemMeta(im);
+				return is;
+			default:
+				return null;
+			}
+		}
 		
 		public ItemStack getItem(Environment env) {
 			Environment cEnv = Environment.getThisEnvironment();
@@ -234,7 +219,8 @@ public class SpecialItem {
 				is.setItemMeta(im);
 				return is;
 			case SAVE_WORLD:
-				is = new ItemStack(Material.COMMAND);
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("COMMAND_BLOCK")); 
+				else is = new ItemStack(Material.getMaterial("COMMAND"));
 				im = is.getItemMeta();
 				im.setDisplayName(ChatColor.DARK_GREEN + "Save World on Disable");
 				if(env.saveWorld()) {
@@ -247,7 +233,8 @@ public class SpecialItem {
 				is.setItemMeta(im);
 				return is;
 			case LOAD_WORLD:
-				is = new ItemStack(Material.EMPTY_MAP);
+				if(Tools.getVersion().startsWith("v1_13")) is = new ItemStack(Material.getMaterial("MAP")); 
+				else is = new ItemStack(Material.getMaterial("EMPTY_MAP"));
 				im = is.getItemMeta();
 				im.setDisplayName(ChatColor.AQUA + "Load World on Enable");
 				if(env.loadFreshWorld()) {
@@ -259,8 +246,9 @@ public class SpecialItem {
 				im.setLore(lores);
 				is.setItemMeta(im);
 				return is;
+			default:
+				return null;
 			}
-			return null;
 		}
 	}
 }

@@ -57,14 +57,18 @@ public class CmdManager implements CommandExecutor {
 						} else p.sendMessage(Message.MISSING.getMessage("clara.stay"));
 					}
 				}
-				if(args.length == 2) {
+				if(args.length >= 2) {
 					if(args[0].equalsIgnoreCase("world")) {
 						if(p.hasPermission("clara.world")) {
-							File f = new File(Bukkit.getWorldContainer(), args[1]);
+							String name = "";
+							for(int i=1; i<args.length; i++) name += " " + args[i];
+							name = name.replaceFirst(" ", "");
+
+							File f = new File(Bukkit.getWorldContainer(), name);
 							if(f.exists()) {
-								World w = Bukkit.getWorld(args[1]);
+								World w = Bukkit.getWorld(name);
 								if(w == null) {
-									WorldCreator creator = new WorldCreator(args[1]);
+									WorldCreator creator = new WorldCreator(name);
 									w = creator.createWorld();
 								}
 								p.teleport(w.getSpawnLocation());
