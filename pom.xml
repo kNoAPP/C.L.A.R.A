@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.kNoAPP</groupId>
 	<artifactId>Clara</artifactId>
-	<version>1.13</version>
+	<version>1.3.1</version>
 	<name>Clara</name>
 	<description>Code loading and routine analysis</description>
 	<properties> 
@@ -32,7 +32,6 @@
 	</dependencies>
 
 	<build>
-		<finalName>Clara</finalName>
 		<sourceDirectory>src</sourceDirectory>
 		<plugins>
 			<plugin>
@@ -49,6 +48,8 @@
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
 					</descriptorRefs>
+					<finalName>Clara</finalName>
+					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
 			</plugin>
 		</plugins>
