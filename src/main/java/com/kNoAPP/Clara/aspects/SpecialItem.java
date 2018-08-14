@@ -156,7 +156,7 @@ public class SpecialItem {
 				else is = new ItemStack(Material.getMaterial("CARPET"), 1, (byte)5);
 				im = is.getItemMeta();
 				im.setDisplayName(ChatColor.GREEN + "Next Page");
-				lores.add(ChatColor.GRAY + "Turn to page " + (page-1));
+				lores.add(ChatColor.GRAY + "Turn to page " + page);
 				im.setLore(lores);
 				is.setItemMeta(im);
 				return is;
@@ -165,7 +165,7 @@ public class SpecialItem {
 				else is = new ItemStack(Material.getMaterial("CARPET"), 1, (byte)14);
 				im = is.getItemMeta();
 				im.setDisplayName(ChatColor.RED + "Previous Page");
-				lores.add(ChatColor.GRAY + "Turn to page " + (page-1));
+				lores.add(ChatColor.GRAY + "Turn to page " + page);
 				im.setLore(lores);
 				is.setItemMeta(im);
 				return is;
