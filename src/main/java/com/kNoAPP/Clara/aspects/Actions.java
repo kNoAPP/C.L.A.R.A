@@ -73,7 +73,7 @@ public class Actions implements Listener {
 					this.cancel();
 				}
 			}
-		}.runTaskTimer(Clara.getPlugin(), 400L, 20L);
+		}.runTaskTimer(Clara.getPlugin(), 200L, 20L);
 	}
 
 	@EventHandler
