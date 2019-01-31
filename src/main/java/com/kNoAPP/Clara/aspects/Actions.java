@@ -413,22 +413,7 @@ public class Actions implements Listener {
 			if(e.getMessage().equalsIgnoreCase("/stop")) {
 				e.setCancelled(true);
 				
-				if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
-					Server transfer = Server.transferServer(Server.getThisServer());
-					for(Player pl : Bukkit.getOnlinePlayers()) {
-						if(transfer != null) {
-							pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
-							pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
-							BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
-							BungeeAPI.connect(pl, transfer.getName());
-						} else pl.kickPlayer(Message.WARN.getMessage("This server is changing setups!"));
-					}
-					new BukkitRunnable() {
-						public void run() {
-							Bukkit.shutdown();
-						}
-					}.runTaskLater(Clara.getPlugin(), 40L);
-				}
+				Clara.safeStop();
 			}
 		}
 	}

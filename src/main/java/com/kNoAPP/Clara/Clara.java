@@ -12,9 +12,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.aspects.Actions;
 import com.kNoAPP.Clara.aspects.Environment;
+import com.kNoAPP.Clara.aspects.Message;
 import com.kNoAPP.Clara.aspects.Server;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.commands.CmdManager;
@@ -146,6 +148,25 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
 			fc.set("UsedWorlds", new ArrayList<String>());
 			Data.ENVIRONMENT.saveYML(fc);
+		}
+	}
+	
+	public static void safeStop() {
+		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
+			Server transfer = Server.transferServer(Server.getThisServer());
+			for(Player pl : Bukkit.getOnlinePlayers()) {
+				if(transfer != null) {
+					pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
+					pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+					BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
+					BungeeAPI.connect(pl, transfer.getName());
+				} else pl.kickPlayer(Message.WARN.getMessage("This server is being re-created!"));
+			}
+			new BukkitRunnable() {
+				public void run() {
+					Bukkit.shutdown();
+				}
+			}.runTaskLater(Clara.getPlugin(), 40L);
 		}
 	}
 	
