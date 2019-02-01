@@ -29,7 +29,7 @@ import com.kNoAPP.Clara.aspects.SpecialItem.DynamicItem;
 import com.kNoAPP.Clara.aspects.SpecialItem.StaticItem;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.bungee.BungeeReceivedEvent;
-import com.kNoAPP.Clara.data.Data;
+import com.kNoAPP.Clara.data.DataHandler;
 import com.kNoAPP.Clara.utils.SupportSound;
 
 public class Actions implements Listener {
@@ -40,7 +40,7 @@ public class Actions implements Listener {
 	@EventHandler
 	public void onBungee(BungeeReceivedEvent e) {
 		if(e.getChannel().equals("restore")) {
-			FileConfiguration fc = Data.MAIN.getCachedYML();
+			FileConfiguration fc = DataHandler.MAIN.getCachedYML();
 			if(fc.getBoolean("RestorePlayersToServers") && fc.getBoolean("Enable.MySQL_Bungee")) {
 				new BukkitRunnable() {
 					public void run() {
@@ -59,7 +59,8 @@ public class Actions implements Listener {
 		p.sendMessage(Message.INFO.getMessage("You may opt out at any time with /clara stay."));
 		
 		new BukkitRunnable() {
-			int i = 181; 
+			int i = 181;
+			boolean cancel = false;
 			public void run() {
 				if(i > 0 && p != null && p.isOnline() && restore.contains(p.getUniqueId())) i--;
 				else {
@@ -67,11 +68,21 @@ public class Actions implements Listener {
 					return;
 				}
 				
-				if(s.isOnline()) {
-					p.sendMessage(Message.INFO.getMessage(ChatColor.GREEN + "You've been restored to " + s.getName() + "!"));
-					BungeeAPI.connect(p, s.getName());
-					this.cancel();
-				}
+				new BukkitRunnable() {
+					public void run() {
+						if(s.isOnline()) {
+							new BukkitRunnable() {
+								public void run() {
+									p.sendMessage(Message.INFO.getMessage(ChatColor.GREEN + "You've been restored to " + s.getName() + "!"));
+									BungeeAPI.connect(p, s.getName());
+								}
+							}.runTask(Clara.getPlugin());
+							cancel = true;
+						}
+					}
+				}.runTaskAsynchronously(Clara.getPlugin());
+				
+				if(cancel) this.cancel();
 			}
 		}.runTaskTimer(Clara.getPlugin(), 200L, 20L);
 	}
@@ -350,7 +361,11 @@ public class Actions implements Listener {
 	
 	@EventHandler
 	public void onJoin(PlayerJoinEvent e) {
-		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
+		new BukkitRunnable() {
+			public void run() {
+				if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
+			}
+		}.runTaskAsynchronously(Clara.getPlugin());
 	}
 	
 	@EventHandler
@@ -360,7 +375,11 @@ public class Actions implements Listener {
 		Environment.changingName.remove(p.getName());
 		Environment.settingWorld.remove(p.getName());
 		
-		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size()-1);
+		new BukkitRunnable() {
+			public void run() {
+				if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size()-1);
+			}
+		}.runTaskAsynchronously(Clara.getPlugin());
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)

@@ -1,24 +1,26 @@
 package com.kNoAPP.Clara.aspects;
 
 import java.io.File;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import com.kNoAPP.Clara.Clara;
-import com.kNoAPP.Clara.data.Data;
-import com.kNoAPP.Clara.data.MySQL;
+import com.kNoAPP.Clara.data.DataHandler;
+import com.kNoAPP.Clara.data.HikariMedium;
+import com.kNoAPP.Clara.data.SQLHelper;
 import com.kNoAPP.Clara.data.Table;
 import com.kNoAPP.Clara.utils.Tools;
-
-import net.md_5.bungee.api.ChatColor;
 
 public class Server {
 
 	public static List<Server> servers = new ArrayList<Server>();
+	private static SQLHelper sql = new SQLHelper();
 	
 	private String name; 
 	private int port;
@@ -37,42 +39,78 @@ public class Server {
 	}
 	
 	public int getPlayers() {
-		return MySQL.getInt(Table.SERVER.toString(), "players", "name", name);
+		HikariMedium hm = Clara.getPlugin().getMedium();
+		int ret = -1;
+		try {
+			Connection c = hm.getConnection();
+			ret = sql.getInt(c, Table.getTable(Table.SERVER).toString(), "players", "name", name);
+			c.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return ret;
 	}
 	
 	public void setPlayers(int players) {
-		MySQL.update(Table.SERVER.toString(), "players", players, "name", name);
+		HikariMedium hm = Clara.getPlugin().getMedium();
+		try {
+			Connection c = hm.getConnection();
+			sql.update(c, Table.getTable(Table.SERVER).toString(), "players", players, "name", name);
+			c.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public boolean isOnline() {
-		return Tools.convertBoolean(MySQL.getInt(Table.SERVER.toString(), "online", "name", name));
+		HikariMedium hm = Clara.getPlugin().getMedium();
+		boolean ret = false;
+		try {
+			Connection c = hm.getConnection();
+			ret = Tools.convertBoolean(sql.getInt(c, Table.getTable(Table.SERVER).toString(), "online", "name", name));
+			c.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
+		return ret;
 	}
 	
 	public void setOnline(boolean b) {
-		MySQL.update(Table.SERVER.toString(), "online", Tools.convertInt(b), "name", name);
-	}
-	
-	public void setOnline(boolean b, boolean s) {
-		if(s) MySQL.specialUpdate(Table.SERVER.toString(), "online", Tools.convertInt(b), "name", name);
-		else MySQL.update(Table.SERVER.toString(), "online", Tools.convertInt(b), "name", name);
+		HikariMedium hm = Clara.getPlugin().getMedium();
+		try {
+			Connection c = hm.getConnection();
+			sql.update(c, Table.getTable(Table.SERVER).toString(), "online", Tools.convertInt(b), "name", name);
+			c.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public void logToDB() {
-		if(MySQL.getString(Table.SERVER.toString(), "name", "name", name) == null) {
-			//Add Server
-			new BukkitRunnable() {
-				public void run() {
-					MySQL.insert(Table.SERVER.toString(), new String[]{name, port+"", "1", "0"});
-				}
-			}.runTaskAsynchronously(Clara.getPlugin());
-		} else if(MySQL.getInt(Table.SERVER.toString(), "port", "name", name) != port) {
-			//Port Updater
-			MySQL.update(Table.SERVER.toString(), "port", port, "name", name);
+		HikariMedium hm = Clara.getPlugin().getMedium();
+		try {
+			Connection c = hm.getConnection();
+			if(sql.getString(c, Table.getTable(Table.SERVER).toString(), "name", "name", name) == null) {
+				sql.insert(c, Table.getTable(Table.SERVER).toString(), new String[]{name, port+"", "1", "0"});
+			} else if(sql.getInt(c, Table.getTable(Table.SERVER).toString(), "port", "name", name) != port) {
+				//Port Updater
+				sql.update(c, Table.getTable(Table.SERVER).toString(), "port", port, "name", name);
+			}
+			c.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
 		}
 	}
 	
 	public void removeFromDB() {
-		MySQL.delete(Table.SERVER.toString(), "name", name);
+		HikariMedium hm = Clara.getPlugin().getMedium();
+		try {
+			Connection c = hm.getConnection();
+			sql.delete(c, Table.getTable(Table.SERVER).toString(), "name", name);
+			c.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static Server getServer(String name) {
@@ -92,7 +130,7 @@ public class Server {
 	public static void importServers() {
 		servers.clear();
 		
-		FileConfiguration fc = Tools.getYML(new File(Data.MAIN.getCachedYML().getString("Bungee.path"), "config.yml"));
+		FileConfiguration fc = Tools.getYML(new File(DataHandler.MAIN.getCachedYML().getString("Bungee.path"), "config.yml"));
 		if(fc != null) {
 			//Servers
 			for(String s : fc.getConfigurationSection("servers").getKeys(false)) {
@@ -110,9 +148,16 @@ public class Server {
 	}
 	
 	public static void checkSetup() {
-		for(String s : MySQL.getStringList(Table.SERVER.toString(), "name")) 
-			if(getServer(s) == null) 
-				MySQL.delete(Table.SERVER.toString(), "name", s);
+		HikariMedium hm = Clara.getPlugin().getMedium();
+		try {
+			Connection c = hm.getConnection();
+			for(String s : sql.getStringList(c, Table.getTable(Table.SERVER).toString(), "name")) 
+				if(getServer(s) == null) 
+					sql.delete(c, Table.getTable(Table.SERVER).toString(), "name", s);
+			c.close();
+		} catch(SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static Server transferServer(Server from) {

@@ -9,7 +9,6 @@ import org.bukkit.ChatColor;
 import org.bukkit.WorldCreator;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.plugin.messaging.PluginMessageListener;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -20,14 +19,16 @@ import com.kNoAPP.Clara.aspects.Message;
 import com.kNoAPP.Clara.aspects.Server;
 import com.kNoAPP.Clara.bungee.BungeeAPI;
 import com.kNoAPP.Clara.commands.CmdManager;
-import com.kNoAPP.Clara.data.Data;
-import com.kNoAPP.Clara.data.MySQL;
+import com.kNoAPP.Clara.data.DataHandler;
+import com.kNoAPP.Clara.data.HikariMedium;
+import com.kNoAPP.Clara.data.Table;
 import com.kNoAPP.Clara.utils.Tools;
 
 //Copyright Alden "kNoAPP" Bansemer 2018
 public class Clara extends JavaPlugin implements PluginMessageListener {
 
-	private static Plugin plugin;
+	private HikariMedium medium;
+	private static Clara plugin;
 	
 	public static boolean failed = false;
 	public static boolean reload = false;
@@ -67,11 +68,18 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	
 	public void importData() {
 		getPlugin().getLogger().info("Importing data...");
-		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
-			if(!MySQL.loadConnection()) {
-				Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] Please fix your database settings and try again!");
-				failed = true;
-			}
+		
+		//This chunk can be removed next patch
+		FileConfiguration fc = DataHandler.MAIN.getCachedYML();
+		if(fc.getString("Table.Server") == null) {
+			fc.set("Table.Server", "Server");
+			DataHandler.MAIN.saveYML(fc);
+		}
+		//Was using it for auto updating the configs
+		
+		if(fc.getBoolean("Enable.MySQL_Bungee")) {
+			medium = new HikariMedium(fc.getString("MySQL.host"), fc.getInt("MySQL.port"), fc.getString("MySQL.database"), fc.getString("MySQL.username"), fc.getString("MySQL.password"));
+			Table.initializeTables();
 			this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
 			this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
 		}
@@ -81,10 +89,14 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		getPlugin().getLogger().info("Exporting data...");
 	}
 	
+	//Database calls here can run on main thread. This will only run on startup/shutdown. Will not affect players
 	public void importAspects() {
 		getPlugin().getLogger().info("Importing aspects...");
 		
-		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
+		FileConfiguration main = DataHandler.MAIN.getYML();
+		FileConfiguration env = DataHandler.ENVIRONMENT.getYML();
+		
+		if(main.getBoolean("Enable.MySQL_Bungee")) {
 			Server.importServers();
 			if(Server.getThisServer() == null && !failed) {
 				Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] This server isn't in your Bungee Configuration!");
@@ -92,12 +104,10 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			}
 		}
 		
-		FileConfiguration e = Data.ENVIRONMENT.getYML();
-		String dbs = e.getString("Database");
-		if(dbs.equals("UNKNOWN")) e.set("Database", getDataFolder().getAbsolutePath() + "/Database");
-		Data.ENVIRONMENT.saveYML(e);
+		String dbs = env.getString("Database");
+		if(dbs.equals("UNKNOWN")) env.set("Database", getDataFolder().getAbsolutePath() + "/Database");
 		
-		File db = new File(Data.ENVIRONMENT.getCachedYML().getString("Database"));
+		File db = new File(env.getString("Database"));
 		if(!db.exists()) db.mkdirs();
 		if(!db.exists() || !db.isDirectory()) {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] Could not load environment database!");
@@ -105,7 +115,7 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		}
 		
 		if(!failed) {
-			if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
+			if(main.getBoolean("Enable.MySQL_Bungee")) {
 				Server.getThisServer().logToDB();
 				Server.checkSetup();
 			}
@@ -113,64 +123,80 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			Environment.importEnvironments();
 			
 			Environment act = Environment.getThisEnvironment(); 
-			FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
-			List<String> used = fc.getStringList("UsedWorlds");
+			List<String> used = env.getStringList("UsedWorlds");
 			if(act != null) for(File f : act.getWorlds(true)) if(Bukkit.getWorld(f.getName()) == null) {
 				Bukkit.createWorld(new WorldCreator(f.getName()));
 				used.add(f.getName());
 			}
-			fc.set("UsedWorlds", used);
-			Data.ENVIRONMENT.saveYML(fc);
+			env.set("UsedWorlds", used);
 			
 			Environment que = Environment.getQueuedEnvironment();
 			if(que != null) que.load();
-			else if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
+			else if(main.getBoolean("Enable.MySQL_Bungee")) {
 				Server s = Server.getThisServer();
 				s.setOnline(true);
 				s.setPlayers(Bukkit.getOnlinePlayers().size());
 			}
 		}
+		
+		DataHandler.ENVIRONMENT.saveYML(env);
 	}
 	
 	public void exportAspects() {
 		getPlugin().getLogger().info("Exporting aspects...");
 		if(!failed) {
-			if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setOnline(false, true);
+			if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
+				//Do not thread
+				Server s = Server.getThisServer();
+				s.setOnline(false);
+				s.setPlayers(0);
+			}
 			
 			Environment tenv = Environment.getThisEnvironment();
 			if(tenv != null && !reload) if(tenv.loadFreshWorld()) tenv.loadWorlds();
 			
 			Environment.exportEnvironments();
-			MySQL.killConnection();
 		}
 		
 		if(!reload) {
-			FileConfiguration fc = Data.ENVIRONMENT.getCachedYML();
+			FileConfiguration fc = DataHandler.ENVIRONMENT.getCachedYML();
 			fc.set("UsedWorlds", new ArrayList<String>());
-			Data.ENVIRONMENT.saveYML(fc);
+			DataHandler.ENVIRONMENT.saveYML(fc);
 		}
 	}
 	
 	public static void safeStop() {
-		if(Data.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
-			Server transfer = Server.transferServer(Server.getThisServer());
-			for(Player pl : Bukkit.getOnlinePlayers()) {
-				if(transfer != null) {
-					pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
-					pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
-					BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
-					BungeeAPI.connect(pl, transfer.getName());
-				} else pl.kickPlayer(Message.WARN.getMessage("This server is being re-created!"));
-			}
+		if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
 			new BukkitRunnable() {
 				public void run() {
-					Bukkit.shutdown();
+					Server transfer = Server.transferServer(Server.getThisServer());
+					new BukkitRunnable() {
+						public void run() {
+							for(Player pl : Bukkit.getOnlinePlayers()) {
+								if(transfer != null) {
+									pl.sendMessage(Message.WARN.getMessage("The server you were connected to has stopped."));
+									pl.sendMessage(Message.WARN.getMessage("You've been connected to " + transfer.getName() + "!"));
+									BungeeAPI.forward("restore", transfer.getName(), Server.getThisServer().getPort() + " " + pl.getName());
+									BungeeAPI.connect(pl, transfer.getName());
+								} else pl.kickPlayer(Message.WARN.getMessage("This server is being re-created!"));
+							}
+							new BukkitRunnable() {
+								public void run() {
+									Bukkit.shutdown();
+								}
+							}.runTaskLater(plugin, 40L);
+						}
+					}.runTask(plugin);
 				}
-			}.runTaskLater(Clara.getPlugin(), 40L);
+			}.runTaskAsynchronously(plugin);
 		}
 	}
 	
-	public static Plugin getPlugin() {
+	public HikariMedium getMedium() {
+		return medium;
+	}
+	
+	public static Clara getPlugin() {
 		return plugin;
 	}
 }

@@ -22,6 +22,8 @@ MySQL:
   database: ExampleDB
   username: root
   password: psswd
+Table:
+  Server: Server 
 Bungee:
   path: /example/path/
 RestorePlayersToServers: true

@@ -23,6 +23,7 @@ public class SpecialItem {
 		
 		private ItemStack is;
 		
+		@SuppressWarnings("deprecation")
 		public ItemStack getItem() {
 			if(is != null) return is;
 			
@@ -146,6 +147,7 @@ public class SpecialItem {
 		
 		POWER, FORCE_RESTART, SAVE_WORLD, LOAD_WORLD, NEXT_ICON, PREVIOUS_ICON;
 		
+		@SuppressWarnings("deprecation")
 		public ItemStack getItem(int page) {
 			ItemStack is;
 			ItemMeta im;
