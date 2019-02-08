@@ -314,6 +314,7 @@ public class Actions implements Listener {
 								
 								p.closeInventory();
 								p.sendMessage(Message.INFO.getMessage("Please type this world's copy name."));
+								p.sendMessage(Message.INFO.getMessage("You can use '.' to keep the same name."));
 								p.playSound(p.getLocation(), SupportSound.BLOCK_WOODEN_BUTTON_CLICK_ON.getCorrectSound(), 1F, 1F);
 							} else {
 								p.sendMessage(Message.INFO.getMessage("Cannot modify a loaded setup!"));
@@ -402,6 +403,8 @@ public class Actions implements Listener {
 			Environment.settingWorld.remove(p.getName());
 			Environment env = (Environment) transfer[0];
 			EWorld ew = (EWorld) transfer[1];
+			
+			if(m.equals(".")) m = ew.getName();
 			
 			EWorld preW = env.getEWorld(m, true);
 			if(preW == null) {
