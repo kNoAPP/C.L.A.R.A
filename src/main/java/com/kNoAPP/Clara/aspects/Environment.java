@@ -2,6 +2,9 @@ package com.kNoAPP.Clara.aspects;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 
@@ -362,7 +365,7 @@ public class Environment {
 		
 		new BukkitRunnable() {
 			public void run() {
-				Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Exporting Worlds/DataHandler...");
+				Bukkit.getConsoleSender().sendMessage(ChatColor.GOLD + "[" + Clara.getPlugin().getName() + "] Exporting Worlds/Data...");
 				unloadPlugins();
 				unloadWorlds();
 				
@@ -431,8 +434,7 @@ public class Environment {
 			World fall = Bukkit.getWorld(DataHandler.ENVIRONMENT.getCachedYML().getString("Fallback"));
 			if(w != null && fall != null) for(Player pl : w.getPlayers()) if(pl != null) pl.teleport(fall.getSpawnLocation());
 			
-			if(!Bukkit.unloadWorld(w.getName(), false)) Bukkit.getConsoleSender().sendMessage(ChatColor.YELLOW + "[" + Clara.getPlugin().getName() + "] " + 
-					ChatColor.GOLD + w.getName() + ChatColor.YELLOW + " may have failed to unload correctly!");
+			Bukkit.unloadWorld(w.getName(), false);
 			
 			FileConfiguration fc = DataHandler.ENVIRONMENT.getCachedYML();
 			List<String> used = fc.getStringList("UsedWorlds");
@@ -602,7 +604,15 @@ public class Environment {
 		File source;
 		if(local) source = new File(Bukkit.getWorldContainer(), "plugins");
 		else source = new File(DataHandler.ENVIRONMENT.getCachedYML().getString("Database"));
-		return source.listFiles();
+		File[] files = source.listFiles();
+		Arrays.sort(files, new Comparator<File>()
+        {
+            @Override
+            public int compare(File f1, File f2) {
+                return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
+            }
+        });
+		return files;
 	}
 	
 	/**
@@ -617,6 +627,13 @@ public class Environment {
 		
 		List<File> files = new ArrayList<File>();
 		for(File f : source.listFiles()) if(f.isDirectory() == directory) files.add(f);
+		Collections.sort(files, new Comparator<File>()
+        {
+            @Override
+            public int compare(File f1, File f2) {
+                return f1.getName().toLowerCase().compareTo(f2.getName().toLowerCase());
+            }
+        });
 		return files;
 	}
 	
