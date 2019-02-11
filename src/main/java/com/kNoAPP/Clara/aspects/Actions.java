@@ -405,6 +405,10 @@ public class Actions implements Listener {
 			EWorld ew = (EWorld) transfer[1];
 			
 			if(m.equals(".")) m = ew.getName();
+			if(m.contains(".") || m.contains("/")) {
+				p.sendMessage(Message.WARN.getMessage(m + " is not a valid copy name. Try again!"));
+				return;
+			}
 			
 			EWorld preW = env.getEWorld(m, true);
 			if(preW == null) {
