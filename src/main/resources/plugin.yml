@@ -1,7 +1,7 @@
 name: Clara
 author: kNoAPP
 main: com.kNoAPP.Clara.Clara
-version: 1.3.2
+version: 1.4
 api-version: 1.13
 commands:
     clara:

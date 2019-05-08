@@ -24,7 +24,7 @@ import com.kNoAPP.Clara.data.HikariMedium;
 import com.kNoAPP.Clara.data.Table;
 import com.kNoAPP.Clara.utils.Tools;
 
-//Copyright Alden "kNoAPP" Bansemer 2018
+//Copyright Alden "kNoAPP" Bansemer 2017-2019
 public class Clara extends JavaPlugin implements PluginMessageListener {
 
 	private HikariMedium medium;
@@ -37,8 +37,8 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	public void onEnable() {
 		long tStart = System.currentTimeMillis();
 		plugin = this;
-		importData();
 		register();
+		importData();
 		importAspects();
 		long tEnd = System.currentTimeMillis();
 		Bukkit.getConsoleSender().sendMessage(ChatColor.GREEN + "[" + getPlugin().getName() + "] You are using Clara for " + Tools.getVersion() + ".");
@@ -64,37 +64,21 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 	private void register() {
 		this.getServer().getPluginManager().registerEvents(new Actions(), this);
 		this.getCommand("clara").setExecutor(new CmdManager());
+		this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
+		this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
 	}
 	
 	public void importData() {
 		getPlugin().getLogger().info("Importing data...");
 		
 		//This chunk can be removed next patch
-		FileConfiguration fc = DataHandler.MAIN.getCachedYML();
-		if(fc.getString("Table.Server") == null) {
-			fc.set("Table.Server", "Server");
-			DataHandler.MAIN.saveYML(fc);
-		}
-		//Was using it for auto updating the configs
-		
-		if(fc.getBoolean("Enable.MySQL_Bungee")) {
-			medium = new HikariMedium(fc.getString("MySQL.host"), fc.getInt("MySQL.port"), fc.getString("MySQL.database"), fc.getString("MySQL.username"), fc.getString("MySQL.password"));
-			Table.initializeTables();
-			this.getServer().getMessenger().registerOutgoingPluginChannel(this, "BungeeCord");
-			this.getServer().getMessenger().registerIncomingPluginChannel(this, "BungeeCord", this);
-		}
-	}
-	
-	public void exportData() {
-		getPlugin().getLogger().info("Exporting data...");
-	}
-	
-	//Database calls here can run on main thread. This will only run on startup/shutdown. Will not affect players
-	public void importAspects() {
-		getPlugin().getLogger().info("Importing aspects...");
-		
 		FileConfiguration main = DataHandler.MAIN.getYML();
 		FileConfiguration env = DataHandler.ENVIRONMENT.getYML();
+		if(main.getString("Table.Server") == null) {
+			main.set("Table.Server", "Server");
+			DataHandler.MAIN.saveYML(main);
+		}
+		//Was using it for auto updating the configs
 		
 		if(main.getBoolean("Enable.MySQL_Bungee")) {
 			Server.importServers();
@@ -113,50 +97,80 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 			Bukkit.getConsoleSender().sendMessage(ChatColor.RED + "[" + getPlugin().getName() + "] Could not load environment database!");
 			failed = true;
 		}
+		DataHandler.ENVIRONMENT.saveYML(env);
 		
-		if(!failed) {
-			if(main.getBoolean("Enable.MySQL_Bungee")) {
-				Server.getThisServer().logToDB();
-				Server.checkSetup();
+		if(main.getBoolean("Enable.MySQL_Bungee")) {
+			try {
+				medium = new HikariMedium(main.getString("MySQL.host"), main.getInt("MySQL.port"), main.getString("MySQL.database"), main.getString("MySQL.username"), main.getString("MySQL.password"));
+			} catch(Exception e) {
+				e.printStackTrace();
+				failed = true;
 			}
-			
-			Environment.importEnvironments();
-			
-			Environment act = Environment.getThisEnvironment(); 
-			List<String> used = env.getStringList("UsedWorlds");
-			if(act != null) for(File f : act.getWorlds(true)) if(Bukkit.getWorld(f.getName()) == null) {
-				Bukkit.createWorld(new WorldCreator(f.getName()));
-				used.add(f.getName());
-			}
-			env.set("UsedWorlds", used);
-			
-			Environment que = Environment.getQueuedEnvironment();
-			if(que != null) que.load();
-			else if(main.getBoolean("Enable.MySQL_Bungee")) {
-				Server s = Server.getThisServer();
-				s.setOnline(true);
-				s.setPlayers(Bukkit.getOnlinePlayers().size());
-			}
+		}
+		
+		if(!failed)
+			Table.initializeTables();
+	}
+	
+	public void exportData() {
+		if(failed)
+			return;
+		
+		getPlugin().getLogger().info("Exporting data...");
+	}
+	
+	//Database calls here can run on main thread. This will only run on startup/shutdown. Will not affect players
+	public void importAspects() {
+		if(failed)
+			return;
+		
+		getPlugin().getLogger().info("Importing aspects...");
+		
+		FileConfiguration main = DataHandler.MAIN.getYML();
+		FileConfiguration env = DataHandler.ENVIRONMENT.getYML();
+		
+		if(main.getBoolean("Enable.MySQL_Bungee")) {
+			Server.getThisServer().logToDB();
+			Server.checkSetup();
+		}
+		
+		Environment.importEnvironments();
+		
+		Environment act = Environment.getThisEnvironment(); 
+		List<String> used = env.getStringList("UsedWorlds");
+		if(act != null) for(File f : act.getWorlds(true)) if(Bukkit.getWorld(f.getName()) == null) {
+			Bukkit.createWorld(new WorldCreator(f.getName()));
+			used.add(f.getName());
+		}
+		env.set("UsedWorlds", used);
+		
+		Environment que = Environment.getQueuedEnvironment();
+		if(que != null) que.load();
+		else if(main.getBoolean("Enable.MySQL_Bungee")) {
+			Server s = Server.getThisServer();
+			s.setOnline(true);
+			s.setPlayers(Bukkit.getOnlinePlayers().size());
 		}
 		
 		DataHandler.ENVIRONMENT.saveYML(env);
 	}
 	
 	public void exportAspects() {
+		if(failed)
+			return;
+		
 		getPlugin().getLogger().info("Exporting aspects...");
-		if(!failed) {
-			if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
-				//Do not thread
-				Server s = Server.getThisServer();
-				s.setOnline(false);
-				s.setPlayers(0);
-			}
-			
-			Environment tenv = Environment.getThisEnvironment();
-			if(tenv != null && !reload) if(tenv.loadFreshWorld()) tenv.loadWorlds();
-			
-			Environment.exportEnvironments();
+		if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) {
+			//Do not thread
+			Server s = Server.getThisServer();
+			s.setOnline(false);
+			s.setPlayers(0);
 		}
+		
+		Environment tenv = Environment.getThisEnvironment();
+		if(tenv != null && !reload) if(tenv.loadFreshWorld()) tenv.loadWorlds();
+		
+		Environment.exportEnvironments();
 		
 		if(!reload) {
 			FileConfiguration fc = DataHandler.ENVIRONMENT.getCachedYML();
