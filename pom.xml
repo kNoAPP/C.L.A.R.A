@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.kNoAPP.Clara</groupId>
 	<artifactId>Clara</artifactId>
-	<version>1.3.1</version>
+	<version>1.4.1</version>
 	<name>Clara</name>
 	<description>Code loading and routine analysis</description>
 	<properties> 
@@ -55,7 +55,7 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<artifactId>maven-assembly-plugin</artifactId>
+				<artifactId>maven-shade-plugin</artifactId>
 				<configuration>
 					<descriptorRefs>
 						<descriptorRef>jar-with-dependencies</descriptorRef>
@@ -63,6 +63,20 @@
 					<finalName>Clara</finalName>
 					<appendAssemblyId>false</appendAssemblyId>
 				</configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+			</plugin>
+			<!--  Used to run unit tests -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M3</version>
 			</plugin>
 		</plugins>
 	</build>
