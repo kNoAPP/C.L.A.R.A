@@ -138,9 +138,13 @@ public class Clara extends JavaPlugin implements PluginMessageListener {
 		
 		Environment act = Environment.getThisEnvironment(); 
 		List<String> used = env.getStringList("UsedWorlds");
-		if(act != null) for(File f : act.getWorlds(true)) if(Bukkit.getWorld(f.getName()) == null) {
-			Bukkit.createWorld(new WorldCreator(f.getName()));
-			used.add(f.getName());
+		if(act != null) {
+			for(File f : act.getWorlds(true)) {
+				if(Bukkit.getWorld(f.getName()) == null) {
+					Bukkit.createWorld(new WorldCreator(f.getName()));
+					used.add(f.getName());
+				}
+			}
 		}
 		env.set("UsedWorlds", used);
 		

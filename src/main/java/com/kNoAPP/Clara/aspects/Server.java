@@ -40,7 +40,7 @@ public class Server {
 	
 	public int getPlayers() {
 		HikariMedium hm = Clara.getPlugin().getMedium();
-		int ret = -1;
+		int ret = 0;
 		try {
 			Connection c = hm.getConnection();
 			ret = sql.getInt(c, Table.getTable(Table.SERVER).toString(), "players", "name", name);
