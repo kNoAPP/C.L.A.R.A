@@ -366,7 +366,7 @@ public class Actions implements Listener {
 			public void run() {
 				if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
 			}
-		}.runTaskAsynchronously(Clara.getPlugin());
+		}.runTaskLaterAsynchronously(Clara.getPlugin(), 1L);
 	}
 	
 	@EventHandler
@@ -378,9 +378,9 @@ public class Actions implements Listener {
 		
 		new BukkitRunnable() {
 			public void run() {
-				if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size()-1);
+				if(DataHandler.MAIN.getCachedYML().getBoolean("Enable.MySQL_Bungee")) Server.getThisServer().setPlayers(Bukkit.getOnlinePlayers().size());
 			}
-		}.runTaskAsynchronously(Clara.getPlugin());
+		}.runTaskLaterAsynchronously(Clara.getPlugin(), 1L);
 	}
 	
 	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
