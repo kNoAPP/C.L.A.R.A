@@ -1,4 +1,4 @@
-# C.L.A.R.A
+# Clara
 Code Loading and Routine Analysis
 
 This plugin is designed to complete the following:
